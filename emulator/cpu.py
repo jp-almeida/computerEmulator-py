@@ -95,13 +95,13 @@ class CPU:
             (instruction & 0b000000000_000_00_000000_0000000_000_111_000) >> 3, #r_regs
             (instruction & 0b000000000_000_00_000000_0000000_000_000_111),
         )
-      
-    @staticmethod  
-    def make_instruction(next_decimal, instruction) -> int:
+
+    def make_instruction(self, instruction, next_decimal: Optional[int] = None) -> int:
         """
         Recebe a próxima instrução em decimal e o restante da instrução em binário
         e concatena as duas
         """
+        next_decimal = self._last_inst_idx + 1 if next_decimal is None else next_decimal
         return (next_decimal << 27) + instruction
       
     def execute(self) -> int:
