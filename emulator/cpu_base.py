@@ -8,13 +8,18 @@ class CPUBase:
         self._last_inst_idx = 0
         self._control()
         self._ops_dict: dict[str, int] = {}
+        self._goto_idx: Optional[int] = None
 
-    def _make_instruction(self, instruction, next_decimal: Optional[int] = None) -> int:
+    def _make_instruction(
+        self, instruction, next_decimal: Optional[int] = None, increment=True
+    ) -> int:
         """
         Recebe a próxima instrução em decimal e o restante da instrução em binário
         e concatena as duas
         """
         next_decimal = self._last_inst_idx + 1 if next_decimal is None else next_decimal
+        if increment:
+            self._last_inst_idx += 1
         return (next_decimal << 27) + instruction
 
     def _init_instruction(self, name: str) -> None:
@@ -32,18 +37,16 @@ class CPUBase:
         Adiciona v em x
         X = X + mem[address]
         """
-
-        # 2: PC <- PC + 1; MBR <- read_byte(PC); GOTO next
+        self._init_instruction("add x")
+        # PC <- PC + 1; MBR <- read_byte(PC); GOTO next
         self.firmware[self._last_inst_idx] = self._make_instruction(
             0b000_00_110101_0010000_001_001_000
         )
-        self._last_inst_idx += 1
-        # 3: MAR <- MBR; read_word; GOTO next
+        # MAR <- MBR; read_word; GOTO next
         self.firmware[self._last_inst_idx] = self._make_instruction(
             0b000_00_010100_1000000_010_010_000
         )
-        self._last_inst_idx += 1
-        # 5: X <- X + MDR; GOTO MAIN;
+        # X <- X + MDR; GOTO MAIN;
         self.firmware[self._last_inst_idx] = self._make_instruction(
             0b000_00_111100_0001000_000_011_100, 0
         )
@@ -54,12 +57,19 @@ class CPUBase:
         Adiciona v em y
         Y = Y + mem[address]
         """
-        # 17: PC <- PC + 1; MBR <- read_byte(PC); GOTO 18
-        self.firmware[17] = self._make_instruction(0b000_00_110101_0010000_001_001_000)
-        # 18: MAR <- MBR; read_word; GOTO 20
-        self.firmware[18] = self._make_instruction(0b000_00_010100_1000000_010_010_000)
-        # 20: Y <- Y + MDR; GOTO MAIN;
-        self.firmware[20] = self._make_instruction(0b000_00_111100_0000100_000_100_100)
+        self._init_instruction("add y")
+        # PC <- PC + 1; MBR <- read_byte(PC); GOTO next
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_110101_0010000_001_001_000
+        )
+        # MAR <- MBR; read_word; GOTO next
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_010100_1000000_010_010_000
+        )
+        # Y <- Y + MDR; GOTO MAIN;
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_111100_0000100_000_100_100, 0
+        )
 
     def _mov_op(self) -> None:
         """
@@ -67,23 +77,35 @@ class CPUBase:
         Guarda o valor de x em v
         mem[address] = X
         """
-        # mem[address] = X
-        ##6: PC <- PC + 1; fetch; GOTO 7
-        self.firmware[6] = 0b000000111_000_00_110101_0010000_001_001_000
-        ##7: MAR <- MBR; GOTO 8
-        self.firmware[7] = 0b000001000_000_00_010100_1000000_000_010_000
-        ##8: MDR <- X; write; GOTO 0
-        self.firmware[8] = 0b000000000_000_00_010100_0100000_100_011_000
+        # PC <- PC + 1; fetch; GOTO next
+        self._init_instruction("mov")
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_110101_0010000_001_001_000
+        )
+        # MAR <- MBR; GOTO next
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_010100_1000000_000_010_000
+        )
+        # MDR <- X; write; GOTO main
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_010100_0100000_100_011_000, 0
+        )
 
     def _goto_op(self) -> None:
         """
         goto <address>
         Vai para a intrução com nome <address>
         """
+        self._init_instruction("goto")
+        self._goto_idx = self._last_inst_idx
         ##9: PC <- PC + 1; fetch; GOTO 10
-        self.firmware[9] = 0b000001010_000_00_110101_0010000_001_001_000
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_110101_0010000_001_001_000
+        )
         ##10: PC <- MBR; fetch; GOTO MBR
-        self.firmware[10] = 0b000000000_100_00_010100_0010000_001_010_000
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b100_00_010100_0010000_001_010_000, 0
+        )
 
     def _jz_op(self) -> None:
         # if X = 0 then goto address
@@ -95,12 +117,24 @@ class CPUBase:
         # self.firmware[272] = 0b000001101_000_00_000000_000000_000_000
 
         # if X = 0 goto address
-        # 11 X <- X; IF ALU = 0 GOTO 268 (100001100) ELSE GOTO 12 (000001100);
-        self.firmware[11] = 0b000001100_001_00_010100_0001000_000_011_000
+
+        self._init_instruction("jz")
+        nxt = self._last_inst_idx + 1
+        # 11 X <- X; IF ALU = 0 GOTO (next + 256) ELSE GOTO 12 next;
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b001_00_010100_0001000_000_011_000
+        )
         # 12 PC <- PC + 1; GOTO MAIN;
-        self.firmware[12] = 0b000000000_000_00_110101_0010000_000_001_000
-        # 268: GOTO 9
-        self.firmware[268] = 0b000001101_000_00_000000_0000000_000_000_000
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_110101_0010000_000_001_000, 0
+        )
+
+        if self._goto_idx is None:
+            raise ValueError(f"'goto' operation must be defined before 'jz'")
+        # 268: GOTO goto
+        self.firmware[nxt + 256] = self._make_instruction(
+            0b000_00_000000_0000000_000_000_000, self._goto_idx, False
+        )
 
     def _sub_op(self) -> None:
         """
@@ -117,34 +151,63 @@ class CPUBase:
         # self.firmware[8] = 0b000001001_000_00_010100_000001_000_000
         ##9: X <- X - H; goto 0
         # self.firmware[9] = 0b000000000_000_00_111111_000100_000_011
+        self._init_instruction("sub x")
 
-        # 13: PC <- PC + 1; fetch;
-        self.firmware[13] = 0b000001110_000_00_110101_0010000_001_001_000
-        # 14: MAR <- MBR; read; GOTO 16;
-        self.firmware[14] = 0b000010000_000_00_010100_1000000_010_010_000
-        # 16: X <- X - MDR; GOTO MAIN;
-        self.firmware[16] = 0b000000000_000_00_111111_0001000_000_011_100
+        # PC <- PC + 1; fetch; goto next
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_110101_0010000_001_001_000
+        )
+        # MAR <- MBR; read; GOTO next;
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_010100_1000000_010_010_000
+        )
+        # X <- X - MDR; GOTO MAIN;
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_111111_0001000_000_011_100, 0
+        )
 
     def _mul_xy(self) -> None:
         # H = X * Y (MULTIPLICAÇÃO)         mnemônico sugerido mult
-        # 21: H <- 0; GOTO 22
-        self.firmware[21] = 0b000010110_000_00_010000_0000010_000_000_000
-        # 22: IF ALU=0 Goto 279 ;ELSE Goto 23
-        self.firmware[22] = 0b000010111_001_00_010100_0000000_000_011_111
+        self._init_instruction("mult")
+        # 21: H <- 0; GOTO next
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_010000_0000010_000_000_000
+        )
+        nxt = self._last_inst_idx + 1
+        # 22: IF ALU=0 Goto nxt+256 ;ELSE Goto nxt
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b001_00_010100_0000000_000_011_111
+        )
         # 279: GOTO MAIN
-        self.firmware[279] = 0b000000000_000_00_110101_0000000_001_001_000
-        # 23: IF ALU=0 Goto 280 ;ELSE Goto 24
-        self.firmware[23] = 0b000011000_001_00_010100_0000000_000_100_111
+        self.firmware[nxt + 256] = self._make_instruction(
+            0b000_00_110101_0000000_001_001_000, 0, False
+        )
+        # 23: IF ALU=0 Goto nxt + 256 ;ELSE Goto 24
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b001_00_010100_0000000_000_100_111
+        )
         # 280: GOTO MAIN
-        self.firmware[280] = 0b000000000_000_00_110101_0000000_001_001_000
-        # 24: H<- H + X; GOTO 23
-        self.firmware[24] = 0b000011001_000_00_111100_0000010_000_011_000
-        # 25: Y <- Y - 1; GOTO 24
-        self.firmware[25] = 0b000011010_000_00_110110_0000100_000_100_111
-        # 26: IF ALU = 0 GOTO 278;ELSE GOTO 24
-        self.firmware[26] = 0b000011000_001_00_010100_0000000_000_100_111
+        self.firmware[self._last_inst_idx + 256] = self._make_instruction(
+            0b000_00_110101_0000000_001_001_000, 0, False
+        )
+
+        # 24: H<- H + X; GOTO back 1
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_111100_0000010_000_011_000, self._last_inst_idx
+        )
+        save = self._last_inst_idx
+        # 25: Y <- Y - 1; GOTO save
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_110110_0000100_000_100_111, save
+        )
+        # 26: IF ALU = 0 GOTO (next + 256); ELSE GOTO save
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b001_00_010100_0000000_000_100_111, save
+        )
         # 282: GOTO MAIN
-        self.firmware[282] = 0b000000000_000_00_110101_0000000_001_001_000
+        self.firmware[
+            self._last_inst_idx + 256
+        ] = 0b000000000_000_00_110101_0000000_001_001_000
 
     def _div_xy(self) -> None:
         # H= X/Y (DIVISÃO)         mnemônico sugerido div
