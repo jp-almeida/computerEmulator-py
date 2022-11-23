@@ -11,8 +11,13 @@ class Assembler:
         self.lines: list[list[str]] = []
         self.lines_bin: list[list[Union[str, list]]] = []
         self.names: dict[str, int] = {}  # Nomes e seus valores correspondentes em bytes
-        # TODO: adicionar as novas microinstruções
-        self.instruction_set = CPUBase()._ops_dict
+
+        cpu_base = CPUBase()
+        self.instruction_set = cpu_base._ops_dict
+
+        self.inst_args_1 = cpu_base._ops_args[1]
+        self.inst_args_0 = cpu_base._ops_args[0]
+
         self.instructions = list(self.instruction_set.keys()) + ["wb", "ww"]
 
     def _is_instruction(self, token: str) -> bool:
@@ -27,15 +32,13 @@ class Assembler:
         """
         return token in self.names.keys()
 
-    def _encode_simple_ops(self, inst: str, ops: list) -> list:
+    def _encode_1_arg_ops(self, inst: str, ops: list) -> list:
         """
-        Transforma as instruções mais simples em binário (adição, subtração etc)
+        Transforma em binário as instruções que exigem um argumento (adição, subtração etc)
         """
-        if len(ops) > 1 and ops[0] == "x":
-            if self._is_name(ops[1]):
-                return [self.instruction_set[inst], ops[1]]
-        elif len(ops) > 1 and ops[0] == "y":
-            pass  # TODO
+        if len(ops) > 1 and self._is_name(ops[0]):
+            return [self.instruction_set[inst], ops[0]]
+
         raise ValueError("Invalid input ", ops)
         # TODO: Fazer para os novos registradores
 
@@ -79,20 +82,11 @@ class Assembler:
         """
         Retorna a instrução dada em binário
         """
-        if instruction in ("add", "sub", "mov", "jz", "ms"):  # simple ops
-            return self._encode_simple_ops(instruction, ops)
+        if instruction in self.inst_args_1:  # operações com 1 argumento
+            return self._encode_1_arg_ops(instruction, ops)
         elif instruction == "goto":
             return self._encode_goto(ops)
-        elif instruction in (
-            "halt",
-            "add1",
-            "sub1",
-            "set1",
-            "set0",
-            "set-1",
-            "div",
-            "mul",
-        ):
+        elif instruction in self.inst_args_0:  # operações com nenhum argumento
             return [self.instruction_set[instruction]]
         elif instruction == "wb":
             return self._encode_wb(ops)
@@ -101,7 +95,7 @@ class Assembler:
         else:
             return []
 
-    def _line_to_bin_step1(self, line) -> list:
+    def _line_to_bin(self, line) -> list:
         """
         Converte a linha inteira de instrução para binário
         """
@@ -111,12 +105,12 @@ class Assembler:
             else self._encode_instruction(line[1], line[2:])
         )
 
-    def _lines_to_bin_step1(self) -> None:
+    def _lines_to_bin(self) -> None:
         """
         Converte todas as linhas para binário
         """
         for line in self.lines:
-            if not (line_bin := self._line_to_bin_step1(line)):
+            if not (line_bin := self._line_to_bin(line)):
                 raise SyntaxError("Line ", self.lines.index(line))
             self.lines_bin.append(line_bin)
 
@@ -147,16 +141,14 @@ class Assembler:
     def _resolve_names(self) -> None:
         for name in self.names.keys():
             self.names[name] = self._count_bytes(self.names[name])
-
+        # TODO: ver melhor essa parte
         for line in self.lines_bin:
             for i in range(len(line)):
                 if self._is_name(line[i]):  # type: ignore
                     line[i] = self._get_name_byte(line[i]) // (  # type: ignore
                         4
                         if line[i - 1]  # type: ignore
-                        in (
-                            self.instruction_set[op] for op in ["add x", "sub x", "mov"]
-                        )
+                        in (self.instruction_set[op] for op in self.inst_args_1)
                         else 1
                     )
 
@@ -168,7 +160,7 @@ class Assembler:
         for l in file:
             tokens = [
                 t
-                for t in str(l).replace("\n", "").replace(",", "").lower().split(" ")
+                for t in str(l).replace("\n", "").replace(",", "").split(" ")
                 if t and t[0] != "#"  # ignora comentários
             ]
             if tokens:
@@ -181,7 +173,7 @@ class Assembler:
             self._load_tokens(fsrc)  # carrega os tokens
             self._find_line_for_names()  # salva os nomes
 
-            self._lines_to_bin_step1()
+            self._lines_to_bin()  # converte todas as linhas para binário
             self._resolve_names()
             byte_arr = [0]
 

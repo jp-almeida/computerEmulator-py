@@ -6,12 +6,16 @@ class CPUBase:
     def __init__(self) -> None:
         self.firmware = (
             array("f", [0]) * 512
-        )  #'f' e não L porque os números estavam dando maior que L
+        )  #'f' e não "L" porque os números estavam dando maior que L
         self._last_inst_idx = 0
+        self._goto_idx: Optional[int] = None  # índice da operação de GOTO
+
+        # para o assembler:
+        # armazena cada instrução e seu índice de início.
         self._ops_dict: dict[str, int] = {}
-        self._goto_idx: Optional[
-            int
-        ] = None  # armazena cada instrução e seu índice de início. Útil para o assembler
+        # operações agrupadas pelo número de argumentos.
+        self._ops_args: dict[int, list[str]] = {}
+
         self._control()  # adiciona as instruções
 
     def _make_instruction(
@@ -35,14 +39,20 @@ class CPUBase:
             self._last_inst_idx += 1
         return (next_decimal << 27) + instruction
 
-    def _init_instruction(self, name: str) -> None:
+    def _init_instruction(self, name: str, args: int = 0) -> None:
         """Chamada no início de toda instrução. Incrementa o último índice de instrução
         e guarda o valor no dicionário de instruções
         Args:
             name (str): Nome da nova instrução
+            args (int, optional): Número de argumentos da instrução. Padrão é 0
         """
         self._last_inst_idx += 1
         self._ops_dict[name] = self._last_inst_idx
+
+        if args in self._ops_args.keys():
+            self._ops_args[args].append(name)
+        else:
+            self._ops_args[args] = [name]
 
     def _main_op(self) -> None:
         # main: PC <- PC + 1; MBR <- read_byte(PC); GOTO MBR
@@ -56,7 +66,7 @@ class CPUBase:
         Adiciona v em x
         X = X + mem[address]
         """
-        self._init_instruction("add x")
+        self._init_instruction("addX", 1)
         # PC <- PC + 1; MBR <- read_byte(PC); GOTO next
         self.firmware[self._last_inst_idx] = self._make_instruction(
             0b000_00_110101_0010000_001_001_000
@@ -72,11 +82,11 @@ class CPUBase:
 
     def _add_y(self) -> None:
         """
-        add y, v
+        addY, v
         Adiciona v em y
         Y = Y + mem[address]
         """
-        self._init_instruction("add y")
+        self._init_instruction("addY", 1)
         # PC <- PC + 1; MBR <- read_byte(PC); GOTO next
         self.firmware[self._last_inst_idx] = self._make_instruction(
             0b000_00_110101_0010000_001_001_000
@@ -92,12 +102,12 @@ class CPUBase:
 
     def _mov_op(self) -> None:
         """
-        mov x, v
+        movX, v
         Guarda o valor de x em v
         mem[address] = X
         """
         # PC <- PC + 1; fetch; GOTO next
-        self._init_instruction("mov")
+        self._init_instruction("movX", 1)
         self.firmware[self._last_inst_idx] = self._make_instruction(
             0b000_00_110101_0010000_001_001_000
         )
@@ -157,7 +167,7 @@ class CPUBase:
 
     def _sub_op(self) -> None:
         """
-        sub x, v
+        subX, v
         Subtrai v de x
         X = X - mem[address]
         """
@@ -170,7 +180,7 @@ class CPUBase:
         # self.firmware[8] = 0b000001001_000_00_010100_000001_000_000
         ##9: X <- X - H; goto 0
         # self.firmware[9] = 0b000000000_000_00_111111_000100_000_011
-        self._init_instruction("sub x")
+        self._init_instruction("subX", 1)
 
         # PC <- PC + 1; fetch; goto next
         self.firmware[self._last_inst_idx] = self._make_instruction(
@@ -292,7 +302,7 @@ class CPUBase:
         )
 
     def _mem_H(self) -> None:
-        self._init_instruction("memH")  # TODO: escolher um nome melhor
+        self._init_instruction("memH", 1)  # TODO: escolher um nome melhor
         # mem[address] = H
         # 36: PC <- PC + 1; fetch; GOTO next
         self.firmware[self._last_inst_idx] = self._make_instruction(
@@ -309,7 +319,7 @@ class CPUBase:
 
     def _x_set(self) -> None:
         # X = mem[address]
-        self._init_instruction("set x")
+        self._init_instruction("setX", 1)
         # 39: PC <- PC + 1; MBR <- read_byte(PC); GOTO next
         self.firmware[self._last_inst_idx] = self._make_instruction(
             0b000_00_110101_0010000_001_001_000
@@ -326,7 +336,7 @@ class CPUBase:
     def _y_mem(self) -> None:
         # Y = mem[address]
         # 42: PC <- PC + 1; MBR <- read_byte(PC); GOTO next
-        self._init_instruction("set y")
+        self._init_instruction("setY", 1)
         self.firmware[self._last_inst_idx] = self._make_instruction(
             0b000_00_110101_0010000_001_001_000
         )
@@ -341,7 +351,7 @@ class CPUBase:
 
     def _mem_y(self) -> None:
         # mem[address] = Y
-        self._init_instruction("mov y")
+        self._init_instruction("movY", 1)
         # 45: PC <- PC + 1; fetch; GOTO next
         self.firmware[self._last_inst_idx] = self._make_instruction(
             0b000_00_110101_0010000_001_001_000
@@ -362,7 +372,7 @@ class CPUBase:
 
     def _add1_op(self) -> None:
         # TODO: incrementar PC
-        self._init_instruction("add1 x")
+        self._init_instruction("add1X")
         ##49: X <- 1 + X; GOTO main
         self.firmware[self._last_inst_idx] = self._make_instruction(
             0b000_00_111001_0001000_000_011_000, 0
@@ -370,7 +380,7 @@ class CPUBase:
 
     def _sub1_op(self) -> None:
         # TODO: incrementar PC
-        self._init_instruction("sub1 x")
+        self._init_instruction("sub1X")
         ##50: H <- 1; GOTO next
         self.firmware[self._last_inst_idx] = self._make_instruction(
             0b000_00_110001_0000010_000_000_000
@@ -382,7 +392,7 @@ class CPUBase:
 
     def _set1_op(self) -> None:
         # TODO: incrementar PC
-        self._init_instruction("set1 x")
+        self._init_instruction("set1X")
         ##52: X <- 1; GOTO main
         self.firmware[self._last_inst_idx] = self._make_instruction(
             0b000_00_110001_0001000_000_011_000, 0
@@ -390,7 +400,7 @@ class CPUBase:
 
     def _set0_op(self) -> None:
         # TODO: incrementar PC
-        self._init_instruction("set0 x")
+        self._init_instruction("set0X")
         ##53: X <- 0; GOTO main
         self.firmware[self._last_inst_idx] = self._make_instruction(
             0b000_00_010000_0001000_000_011_000, 0
@@ -398,7 +408,7 @@ class CPUBase:
 
     def _set_1_op(self) -> None:  # TODO: Not working
         # TODO: incrementar PC
-        self._init_instruction("set-1 x")
+        self._init_instruction("set-1X")
         ##54: X <- -1; GOTO main
         self.firmware[self._last_inst_idx] = self._make_instruction(
             0b000_00_110010_0001000_000_011_000, 0
@@ -406,7 +416,7 @@ class CPUBase:
 
     def _div_op(self) -> None:  # TODO: some problems
         # TODO: incrementar PC
-        self._init_instruction("div2 x")
+        self._init_instruction("div2X")
         ##55: X <- X/2; GOTO main
         self.firmware[self._last_inst_idx] = self._make_instruction(
             0b000_10_011000_0001000_000_011_000, 0
@@ -414,7 +424,7 @@ class CPUBase:
 
     def _mul_op(self) -> None:
         # TODO: incrementar PC
-        self._init_instruction("mul2 x")
+        self._init_instruction("mul2X")
         ##56: X <- X*2; GOTO main
         self.firmware[self._last_inst_idx] = self._make_instruction(
             0b000_01_011000_0001000_000_011_000, 0
@@ -423,6 +433,7 @@ class CPUBase:
     def _halt(self) -> None:
         """Halt instruction"""
         self._ops_dict["halt"] = 255
+        self._ops_args[0].append("halt")
         self.firmware[255] = 0b000000000_000_00_000000_0000000_000_000_000
 
     def _control(self) -> None:
