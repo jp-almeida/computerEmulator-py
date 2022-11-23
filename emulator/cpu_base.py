@@ -274,13 +274,20 @@ class CPUBase:
         )
 
     def _mem_H(self) -> None:
+        self._init_instruction("memH")  # TODO: escolher um nome melhor
         # mem[address] = H
-        # 36: PC <- PC + 1; fetch; GOTO 37
-        self.firmware[36] = 0b000100101_000_00_110101_0010000_001_001_000
-        # 37: MAR <- MBR; GOTO 38
-        self.firmware[37] = 0b000100110_000_00_010100_1000000_000_010_000
-        # 38: MDR <- X; write; GOTO MAIN
-        self.firmware[38] = 0b000000000_000_00_011000_0100000_100_111_000
+        # 36: PC <- PC + 1; fetch; GOTO next
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_110101_0010000_001_001_000
+        )
+        # 37: MAR <- MBR; GOTO next
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_010100_1000000_000_010_000
+        )
+        # 38: MDR <- X; write; GOTO main
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_011000_0100000_100_111_000, 0, False
+        )
 
     def _x_set(self) -> None:
         # X = mem[address]         mnemônico sugerido set
