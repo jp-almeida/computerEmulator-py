@@ -56,13 +56,12 @@ class CPUBase:
 
     def _main(self) -> None:
         # main: PC <- PC + 1; MBR <- read_byte(PC); GOTO MBR
-        self.firmware[
-            self._last_inst_idx
-        ] = 0b000000000_100_00_110101_0010000_001_001_000
+        self.firmware[0] = 0b000000000_100_00_110101_0010000_001_001_000
+        self._last_inst_idx += 1
 
     def _add_x(self) -> None:
         """
-        add x, v
+        addX v
         Adiciona v em x
         X = X + mem[address]
         """
@@ -75,14 +74,14 @@ class CPUBase:
         self.firmware[self._last_inst_idx] = self._make_instruction(
             0b000_00_010100_1000000_010_010_000
         )
-        # X <- X + MDR; GOTO MAIN;
+        # X <- X + MDR; GOTO main;
         self.firmware[self._last_inst_idx] = self._make_instruction(
             0b000_00_111100_0001000_000_011_100, 0
         )
 
     def _add_y(self) -> None:
         """
-        addY, v
+        addY v
         Adiciona v em y
         Y = Y + mem[address]
         """
@@ -95,14 +94,14 @@ class CPUBase:
         self.firmware[self._last_inst_idx] = self._make_instruction(
             0b000_00_010100_1000000_010_010_000
         )
-        # Y <- Y + MDR; GOTO MAIN;
+        # Y <- Y + MDR; GOTO main;
         self.firmware[self._last_inst_idx] = self._make_instruction(
             0b000_00_111100_0000100_000_100_100, 0
         )
 
     def _mov_x(self) -> None:
         """
-        movX, v
+        movX v
         Guarda o valor de x em v
         mem[address] = X
         """
@@ -167,7 +166,7 @@ class CPUBase:
 
     def _sub_x(self) -> None:
         """
-        subX, v
+        subX v
         Subtrai v de x
         X = X - mem[address]
         """
@@ -443,26 +442,26 @@ class CPUBase:
         self._main()
 
         self._add_x()  # X = X + mem[address]
-        self._sub_x()  # X = X - mem[address]
-
-        self._add_y()
-        self._mul_xy()
-        self._div_xy()
-        self._mem_H()
-        self._set_x()  # X = mem[address]
-        self._set_y()  # Y = mem[address]
-        self._mov_y()  # mem[address] = Y
-        self._x_desl()
-
-        self._mov_x()  # mem[address] = X
+        # self._sub_x()  # X = X - mem[address]
         self._goto()  # goto address
-        self._add1_x()  # x = x+1
-        self._sub1_x()  # x = x-1
-        self._set1_x()  # x = 1
-        self._set0_x()  # x = 0
-        self._set_1_x()  # x = -1
-        self._div2_x()  # divisão por 2
-        self._mul2_x()  # multiplacação por 2
-        self._jz()  # if X = 0 then goto address
+
+        # self._add_y()
+        # self._mul_xy()
+        # self._div_xy()
+        # self._mem_H()
+        # self._set_x()  # X = mem[address]
+        # self._set_y()  # Y = mem[address]
+        # self._mov_y()  # mem[address] = Y
+        # self._x_desl()
+
+        # self._mov_x()  # mem[address] = X
+        # self._add1_x()  # x = x+1
+        # self._sub1_x()  # x = x-1
+        # self._set1_x()  # x = 1
+        # self._set0_x()  # x = 0
+        # self._set_1_x()  # x = -1
+        # self._div2_x()  # divisão por 2
+        # self._mul2_x()  # multiplicação por 2
+        # self._jz()  # if X = 0 then goto address
 
         self._halt()  # halt
