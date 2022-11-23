@@ -79,7 +79,7 @@ class CPUBase:
         )
         # X <- X + MDR; GOTO main;
         self.firmware[self._next_idx] = self._make_instruction(
-            0b000_00_111100_0001000_000_011_000, 0
+            0b000_00_111100_0001000_000_111_011, 0
         )
 
     def _add_y(self) -> None:
@@ -99,7 +99,7 @@ class CPUBase:
         )
         # Y <- Y + MDR; GOTO main;
         self.firmware[self._next_idx] = self._make_instruction(
-            0b000_00_111100_0000100_000_000_100, 0
+            0b000_00_111100_0000100_000_111_100, 0
         )
 
     def _mov_x(self) -> None:
@@ -342,32 +342,32 @@ class CPUBase:
         # X = mem[address]
         self._init_instruction("setX", 1)
         # 39: PC <- PC + 1; MBR <- read_byte(PC); GOTO next
-        self.firmware[self._next_idx] = self._make_instruction(
+        self.firmware[self._next_idx - 1] = self._make_instruction(
             0b000_00_110101_0010000_001_001_000
         )
         # 40: MAR <- MBR; read_word; GOTO next
-        self.firmware[self._next_idx] = self._make_instruction(
+        self.firmware[self._next_idx - 1] = self._make_instruction(
             0b000_00_010100_1000000_010_010_000
         )
         # 41: X <- MDR; GOTO main
         self.firmware[self._next_idx] = self._make_instruction(
-            0b000_00_010100_0001000_000_000_111, 0
+            0b000_00_010100_0001000_000_111_000, 0
         )
 
     def _set_y(self) -> None:
         # Y = mem[address]
         # 42: PC <- PC + 1; MBR <- read_byte(PC); GOTO next
         self._init_instruction("setY", 1)
-        self.firmware[self._next_idx] = self._make_instruction(
+        self.firmware[self._next_idx - 1] = self._make_instruction(
             0b000_00_110101_0010000_001_001_000
         )
         # 43: MAR <- MBR; read_word; GOTO next
-        self.firmware[self._next_idx] = self._make_instruction(
+        self.firmware[self._next_idx - 1] = self._make_instruction(
             0b000_00_010100_1000000_010_010_000
         )
         # 44: Y <- MDR; GOTO MAIN
         self.firmware[self._next_idx] = self._make_instruction(
-            0b000_00_010100_0000100_000_000_111, 0
+            0b000_00_010100_0000100_000_111_000, 0
         )
 
     def _x_desl(self) -> None:  # TODO: o mesmo da operação de multiplicação por 2?
