@@ -111,7 +111,7 @@ class Assembler:
         """
         for line in self.lines:
             if not (line_bin := self._line_to_bin(line)):
-                raise SyntaxError("Line ", self.lines.index(line))
+                raise SyntaxError("Line ", self.lines.index(line) + 1)
             self.lines_bin.append(line_bin)
 
     def _find_line_for_names(self) -> None:
@@ -156,13 +156,11 @@ class Assembler:
         """
         Trata as strings tokens para encaixar em um padrão
         """
-        # TODO: ignorar comentário com espaço
-        for l in file:
-            tokens = [
-                t
-                for t in str(l).replace("\n", "").replace(",", "").split(" ")
-                if t and t[0] != "#"  # ignora comentários
-            ]
+        for line in file.readlines():
+            l = str(line).split("#")[0]  # ignora comentários de linha
+
+            tokens = [t for t in l.replace("\n", "").replace(",", "").split(" ") if t]
+
             if tokens:
                 self.lines.append(tokens)
 
