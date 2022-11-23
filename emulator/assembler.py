@@ -144,11 +144,12 @@ class Assembler:
         # TODO: ver melhor essa parte
         for line in self.lines_bin:
             for i in range(len(line)):
+
                 if self._is_name(line[i]):  # type: ignore
                     line[i] = self._get_name_byte(line[i]) // (  # type: ignore
                         4
                         if line[i - 1]  # type: ignore
-                        in (self.instruction_set[op] for op in self.inst_args_1)
+                        in [self.instruction_set[op] for op in self.inst_args_1]
                         else 1
                     )
 
