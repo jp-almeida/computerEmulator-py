@@ -154,7 +154,7 @@ class Assembler:
 
     def _load_tokens(self, file: IOBase) -> None:
         """
-        Trata as strings tokens para encaixar em um padrão
+        Trata as strings tokens para encaixar em um padrão e ignorar comentários
         """
         for line in file.readlines():
             l = str(line).split("#")[0]  # ignora comentários de linha
@@ -164,12 +164,23 @@ class Assembler:
             if tokens:
                 self.lines.append(tokens)
 
+    def _write_file(self) -> None:
+        """Escreve no arquivo binário"""
+        byte_arr = [0]
+        for line in self.lines_bin:
+            for byte in line:
+                byte_arr.append(byte)  # type: ignore
+
+            with open(self.output_file, "wb") as out:
+                out.write(bytearray(byte_arr))
+
     def execute(self) -> None:
         """Executa o assembler"""
 
-        with open(self.source_file, "r") as fsrc:
-            self._load_tokens(fsrc)  # carrega os tokens
-            self._find_line_for_names()  # salva os nomes
+        with open(self.source_file, "r") as src:
+            self._load_tokens(src)  # carrega os tokens
+
+        self._find_line_for_names()  # salva os nomes
 
             self._lines_to_bin()  # converte todas as linhas para binário
             self._resolve_names()
