@@ -1,5 +1,6 @@
 from io import IOBase
 from typing import Union
+
 from .cpu_base import CPUBase
 
 
@@ -11,21 +12,7 @@ class Assembler:
         self.lines_bin: list[list[Union[str, list]]] = []
         self.names: dict[str, int] = {}  # Nomes e seus valores correspondentes em bytes
         # TODO: adicionar as novas microinstruções
-        self.instruction_set = {
-            "add": 0x02,
-            "sub": 0x06,
-            "goto": 0x0D,
-            "mov": 0x0A,
-            "jz": 0x0F,
-            "add1": 0x11,
-            "sub1": 0x12,
-            "set1": 20,
-            "set0": 21,
-            "set-1": 22,
-            "div": 23,
-            "mul": 24,
-            "halt": 0xFF,
-        }
+        self.instruction_set = CPUBase()._ops_dict
         self.instructions = list(self.instruction_set.keys()) + ["wb", "ww"]
 
     def _is_instruction(self, token: str) -> bool:
@@ -47,6 +34,8 @@ class Assembler:
         if len(ops) > 1 and ops[0] == "x":
             if self._is_name(ops[1]):
                 return [self.instruction_set[inst], ops[1]]
+        elif len(ops) > 1 and ops[0] == "y":
+            pass  # TODO
         raise ValueError("Invalid input ", ops)
         # TODO: Fazer para os novos registradores
 
@@ -161,11 +150,13 @@ class Assembler:
 
         for line in self.lines_bin:
             for i in range(len(line)):
-                if self._is_name(line[i]):
-                    line[i] = self._get_name_byte(line[i]) // (
+                if self._is_name(line[i]):  # type: ignore
+                    line[i] = self._get_name_byte(line[i]) // (  # type: ignore
                         4
-                        if line[i - 1]
-                        in (self.instruction_set[op] for op in ["add", "sub", "mov"])
+                        if line[i - 1]  # type: ignore
+                        in (
+                            self.instruction_set[op] for op in ["add x", "sub x", "mov"]
+                        )
                         else 1
                     )
 
@@ -196,7 +187,7 @@ class Assembler:
 
             for line in self.lines_bin:
                 for byte in line:
-                    byte_arr.append(byte)
+                    byte_arr.append(byte)  # type: ignore
 
             with open(self.output_file, "wb") as fdst:
                 fdst.write(bytearray(byte_arr))

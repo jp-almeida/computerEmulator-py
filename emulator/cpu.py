@@ -11,6 +11,7 @@ class CPU(CPUBase):
     """Emulates a CPU"""
 
     def __init__(self) -> None:
+        super().__init__()
         self._regs = Registers()
         self._alu = ALU()
         self._bus = Bus()
@@ -82,7 +83,7 @@ class CPU(CPUBase):
         Retorna:
           bool -> se ainda existe passo a ser executado ou não
         """
-        self._regs.MIR = self.firmware[self._regs.MPC]
+        self._regs.MIR = self.firmware[self._regs.MPC]  # type: ignore
 
         if self._regs.MIR == 0:
             return False
@@ -98,6 +99,7 @@ class CPU(CPUBase):
 
     @staticmethod
     def _parse_instruction(instruction: int) -> tuple:
+        instruction = int(instruction)
         return (
             (instruction & 0b111111111_000_00_000000_0000000_000_000_000)
             >> 27,  # next instruction
