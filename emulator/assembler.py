@@ -78,20 +78,20 @@ class Assembler:
         else:
             raise ValueError("Invalid input ", ops)
 
-    def _encode_instruction(self, instruction: str, ops: list) -> list:
+    def _encode_instruction(self, instruction: str, ops: list) -> list[int]:
         """
         Retorna a instrução dada em binário
         """
-        if instruction in self.inst_args_1:  # operações com 1 argumento
-            return self._encode_1_arg_ops(instruction, ops)
-        elif instruction == "goto":
+        if instruction == "goto":
             return self._encode_goto(ops)
-        elif instruction in self.inst_args_0:  # operações com nenhum argumento
-            return [self.instruction_set[instruction]]
         elif instruction == "wb":
             return self._encode_wb(ops)
         elif instruction == "ww":
             return self._encode_ww(ops)
+        elif instruction in self.inst_args_1:  # operações com 1 argumento
+            return self._encode_1_arg_ops(instruction, ops)
+        elif instruction in self.inst_args_0:  # operações com nenhum argumento
+            return [self.instruction_set[instruction]]
         else:
             return []
 
