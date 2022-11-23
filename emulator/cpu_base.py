@@ -54,13 +54,13 @@ class CPUBase:
         else:
             self._ops_args[args] = [name]
 
-    def _main_op(self) -> None:
+    def _main(self) -> None:
         # main: PC <- PC + 1; MBR <- read_byte(PC); GOTO MBR
         self.firmware[
             self._last_inst_idx
         ] = 0b000000000_100_00_110101_0010000_001_001_000
 
-    def _add_op(self) -> None:
+    def _add_x(self) -> None:
         """
         add x, v
         Adiciona v em x
@@ -100,7 +100,7 @@ class CPUBase:
             0b000_00_111100_0000100_000_100_100, 0
         )
 
-    def _mov_op(self) -> None:
+    def _mov_x(self) -> None:
         """
         movX, v
         Guarda o valor de x em v
@@ -120,7 +120,7 @@ class CPUBase:
             0b000_00_010100_0100000_100_011_000, 0
         )
 
-    def _goto_op(self) -> None:
+    def _goto(self) -> None:
         """
         goto <address>
         Vai para a intrução com nome <address>
@@ -136,7 +136,7 @@ class CPUBase:
             0b100_00_010100_0010000_001_010_000, 0
         )
 
-    def _jz_op(self) -> None:
+    def _jz(self) -> None:
         # if X = 0 then goto address
         ## 15: X <- X; IF ALU = 0 GOTO 272(100010000) ELSE GOTO 16(000010000)
         # self.firmware[15] = 0b000010000_001_00_010100_000100_000_011
@@ -165,7 +165,7 @@ class CPUBase:
             0b000_00_000000_0000000_000_000_000, self._goto_idx, False
         )
 
-    def _sub_op(self) -> None:
+    def _sub_x(self) -> None:
         """
         subX, v
         Subtrai v de x
@@ -317,7 +317,7 @@ class CPUBase:
             0b000_00_011000_0100000_100_111_000, 0
         )
 
-    def _x_set(self) -> None:
+    def _set_x(self) -> None:
         # X = mem[address]
         self._init_instruction("setX", 1)
         # 39: PC <- PC + 1; MBR <- read_byte(PC); GOTO next
@@ -333,7 +333,7 @@ class CPUBase:
             0b000_00_010100_0001000_000_000_111, 0
         )
 
-    def _y_mem(self) -> None:
+    def _set_y(self) -> None:
         # Y = mem[address]
         # 42: PC <- PC + 1; MBR <- read_byte(PC); GOTO next
         self._init_instruction("setY", 1)
@@ -349,7 +349,7 @@ class CPUBase:
             0b000_00_010100_0000100_000_000_111, 0
         )
 
-    def _mem_y(self) -> None:
+    def _mov_y(self) -> None:
         # mem[address] = Y
         self._init_instruction("movY", 1)
         # 45: PC <- PC + 1; fetch; GOTO next
@@ -370,7 +370,7 @@ class CPUBase:
         # 48: X<-X deslocado
         self.firmware[48] = 0b0000000000_001_00_101000_0010000_000_111_11
 
-    def _add1_op(self) -> None:
+    def _add1_x(self) -> None:
         # TODO: incrementar PC
         self._init_instruction("add1X")
         ##49: X <- 1 + X; GOTO main
@@ -378,7 +378,7 @@ class CPUBase:
             0b000_00_111001_0001000_000_011_000, 0
         )
 
-    def _sub1_op(self) -> None:
+    def _sub1_x(self) -> None:
         # TODO: incrementar PC
         self._init_instruction("sub1X")
         ##50: H <- 1; GOTO next
@@ -390,7 +390,7 @@ class CPUBase:
             0b000_00_111111_0001000_000_011_000, 0
         )
 
-    def _set1_op(self) -> None:
+    def _set1_x(self) -> None:
         # TODO: incrementar PC
         self._init_instruction("set1X")
         ##52: X <- 1; GOTO main
@@ -398,7 +398,7 @@ class CPUBase:
             0b000_00_110001_0001000_000_011_000, 0
         )
 
-    def _set0_op(self) -> None:
+    def _set0_x(self) -> None:
         # TODO: incrementar PC
         self._init_instruction("set0X")
         ##53: X <- 0; GOTO main
@@ -406,7 +406,7 @@ class CPUBase:
             0b000_00_010000_0001000_000_011_000, 0
         )
 
-    def _set_1_op(self) -> None:  # TODO: Not working
+    def _set_1_x(self) -> None:  # TODO: Not working
         # TODO: incrementar PC
         self._init_instruction("set-1X")
         ##54: X <- -1; GOTO main
@@ -414,7 +414,7 @@ class CPUBase:
             0b000_00_110010_0001000_000_011_000, 0
         )
 
-    def _div_op(self) -> None:  # TODO: some problems
+    def _div2_x(self) -> None:  # TODO: some problems
         # TODO: incrementar PC
         self._init_instruction("div2X")
         ##55: X <- X/2; GOTO main
@@ -422,7 +422,7 @@ class CPUBase:
             0b000_10_011000_0001000_000_011_000, 0
         )
 
-    def _mul_op(self) -> None:
+    def _mul2_x(self) -> None:
         # TODO: incrementar PC
         self._init_instruction("mul2X")
         ##56: X <- X*2; GOTO main
@@ -440,29 +440,29 @@ class CPUBase:
         """Adiciona todas as operações ao firmware da CPU"""
         # C => MAR, MDR, PC, X, Y, H
         # B => 000 = MDR, 001 = PC, 010 = MBR, 011 = x, 100 = Y
-        self._main_op()
+        self._main()
 
-        self._add_op()  # X = X + mem[address]
-        self._sub_op()  # X = X - mem[address]
+        self._add_x()  # X = X + mem[address]
+        self._sub_x()  # X = X - mem[address]
 
         self._add_y()
         self._mul_xy()
         self._div_xy()
         self._mem_H()
-        self._x_set()
-        self._y_mem()
-        self._mem_y()
+        self._set_x()  # X = mem[address]
+        self._set_y()  # Y = mem[address]
+        self._mov_y()  # mem[address] = Y
         self._x_desl()
 
-        self._mov_op()  # mem[address] = X
-        self._goto_op()  # goto address
-        self._add1_op()  # x = x+1
-        self._sub1_op()  # x = x-1
-        self._set1_op()  # x = 1
-        self._set0_op()  # x = 0
-        self._set_1_op()  # x = -1
-        self._div_op()  # divisão por 2
-        self._mul_op()  # multiplacação por 2
-        self._jz_op()  # if X = 0 then goto address
+        self._mov_x()  # mem[address] = X
+        self._goto()  # goto address
+        self._add1_x()  # x = x+1
+        self._sub1_x()  # x = x-1
+        self._set1_x()  # x = 1
+        self._set0_x()  # x = 0
+        self._set_1_x()  # x = -1
+        self._div2_x()  # divisão por 2
+        self._mul2_x()  # multiplacação por 2
+        self._jz()  # if X = 0 then goto address
 
         self._halt()  # halt
