@@ -9,15 +9,26 @@ class CPUBase:
         )  #'f' e não L porque os números estavam dando maior que L
         self._last_inst_idx = 0
         self._ops_dict: dict[str, int] = {}
-        self._goto_idx: Optional[int] = None
-        self._control()
+        self._goto_idx: Optional[
+            int
+        ] = None  # armazena cada instrução e seu índice de início. Útil para o assembler
+        self._control()  # adiciona as instruções
 
     def _make_instruction(
-        self, instruction, next_decimal: Optional[int] = None, increment=True
+        self, instruction: int, next_decimal: Optional[int] = None, increment=True
     ) -> int:
-        """
-        Recebe a próxima instrução em decimal e o restante da instrução em binário
+        """Recebe a próxima instrução em decimal e o restante da instrução em binário
         e concatena as duas
+
+        Args:
+            instruction (int): Instrução sem o início que indica o próximo passo
+            next_decimal (Optional[int], optional): Próximo instrução. Caso None, considerará o número atual+1.
+                Caso 0, não incrementará o _last_inst_idx, uma vez que estará retornando à instrução 'main'
+                Padrão é None.
+            increment (bool, optional): Se irá incrementar o _last_inst_idx. Padrão é True.
+
+        Returns:
+            int: Instrução completa
         """
         next_decimal = self._last_inst_idx + 1 if next_decimal is None else next_decimal
         if increment and not next_decimal == 0:
@@ -25,6 +36,11 @@ class CPUBase:
         return (next_decimal << 27) + instruction
 
     def _init_instruction(self, name: str) -> None:
+        """Chamada no início de toda instrução. Incrementa o último índice de instrução
+        e guarda o valor no dicionário de instruções
+        Args:
+            name (str): Nome da nova instrução
+        """
         self._last_inst_idx += 1
         self._ops_dict[name] = self._last_inst_idx
 
@@ -408,6 +424,7 @@ class CPUBase:
         self.firmware[255] = 0b000000000_000_00_000000_0000000_000_000_000
 
     def _control(self) -> None:
+        """Adiciona todas as operações ao firmware da CPU"""
         # C => MAR, MDR, PC, X, Y, H
         # B => 000 = MDR, 001 = PC, 010 = MBR, 011 = x, 100 = Y
         self._main_op()
@@ -415,7 +432,6 @@ class CPUBase:
         self._add_op()  # X = X + mem[address]
         self._sub_op()  # X = X - mem[address]
 
-        # 🛑🛑 coloquei as operações adicionadas aqui, mas tá sem os 'op' no final do nome e também não sei nome melhor pra elas k
         self._add_y()
         self._mul_xy()
         self._div_xy()
@@ -427,13 +443,13 @@ class CPUBase:
 
         self._mov_op()  # mem[address] = X
         self._goto_op()  # goto address
-        self._add1_op()
-        self._sub1_op()
-        self._set1_op()
-        self._set0_op()
-        self._set_1_op()
-        self._div_op()
-        self._mul_op()
+        self._add1_op()  # x = x+1
+        self._sub1_op()  # x = x-1
+        self._set1_op()  # x = 1
+        self._set0_op()  # x = 0
+        self._set_1_op()  # x = -1
+        self._div_op()  # divisão por 2
+        self._mul_op()  # multiplacação por 2
         self._jz_op()  # if X = 0 then goto address
 
-        self._halt()
+        self._halt()  # halt
