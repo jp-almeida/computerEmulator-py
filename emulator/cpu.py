@@ -32,7 +32,7 @@ class CPU(CPUBase):
 
     def execute(self) -> int:
         """
-        Execução
+        Execução da CPU
         Retorna:
             int: Número de passos
         """
@@ -83,13 +83,15 @@ class CPU(CPUBase):
         Retorna:
           bool -> se ainda existe passo a ser executado ou não
         """
-        self._regs.MIR = self.firmware[self._regs.MPC]  # type: ignore
+        self._regs.MIR = int(self.firmware[self._regs.MPC])
 
         if self._regs.MIR == 0:
             return False
-        nxt, jam, alu, w_regs, mem, r_regs, _ = self._parse_instruction(self._regs.MIR)
+        nxt, jam, alu, w_regs, mem, r_regsB, r_regsA = self._parse_instruction(
+            self._regs.MIR
+        )
 
-        self._read_registers(r_regs)
+        self._read_registers(r_regsB, r_regsA)
         self._alu_operation(alu)
         self._write_registers(w_regs)
         self._memory_io(mem)
