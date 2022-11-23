@@ -141,7 +141,7 @@ class Assembler:
     def _resolve_names(self) -> None:
         for name in self.names.keys():
             self.names[name] = self._count_bytes(self.names[name])
-        # TODO: ver melhor essa parte
+
         for line in self.lines_bin:
             for i in range(len(line)):
 

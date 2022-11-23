@@ -19,7 +19,10 @@ class CPUBase:
         self._control()  # adiciona as instruções
 
     def _make_instruction(
-        self, instruction: int, next_decimal: Optional[int] = None, increment=True
+        self,
+        instruction: int,
+        next_decimal: Optional[int] = None,
+        increment: bool = True,
     ) -> int:
         """Recebe a próxima instrução em decimal e o restante da instrução em binário
         e concatena as duas

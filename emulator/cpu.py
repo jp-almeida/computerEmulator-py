@@ -101,7 +101,6 @@ class CPU(CPUBase):
 
     @staticmethod
     def _parse_instruction(instruction: int) -> tuple:
-        instruction = int(instruction)
         return (
             (instruction & 0b111111111_000_00_000000_0000000_000_000_000)
             >> 27,  # next instruction
@@ -111,8 +110,8 @@ class CPU(CPUBase):
             >> 9,  # w_regs
             (instruction & 0b000000000_000_00_000000_0000000_111_000_000) >> 6,  # mem
             (instruction & 0b000000000_000_00_000000_0000000_000_111_000)
-            >> 3,  # r_regs
-            (instruction & 0b000000000_000_00_000000_0000000_000_000_111),
+            >> 3,  # r_regsB
+            (instruction & 0b000000000_000_00_000000_0000000_000_000_111),  # r_regsA
         )
 
     def __str__(self) -> str:
