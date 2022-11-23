@@ -122,6 +122,22 @@ class CPUBase:
             0b000_00_010100_0100000_100_011_000, 0
         )
 
+    def _mov_y(self) -> None:
+        # mem[address] = Y
+        self._init_instruction("movY", 1)
+        # 45: PC <- PC + 1; fetch; GOTO next
+        self.firmware[self._next_idx] = self._make_instruction(
+            0b000_00_110101_0010000_001_001_000
+        )
+        # 46: MAR <- MBR; GOTO next
+        self.firmware[self._next_idx] = self._make_instruction(
+            0b000_00_010100_1000000_000_010_000
+        )
+        # 47: MDR <- X; write; GOTO main
+        self.firmware[self._next_idx] = self._make_instruction(
+            0b000_00_010100_0100000_100_100_111, 0
+        )
+
     def _goto(self) -> None:
         """
         goto <address>
@@ -196,6 +212,9 @@ class CPUBase:
         self.firmware[self._next_idx] = self._make_instruction(
             0b000_00_111111_0001000_000_011_100, 0
         )
+
+    def _sub_y(self) -> None:
+        pass  # TODO: subY
 
     def _mul_xy(self) -> None:
         # TODO: incrementar PC
@@ -351,22 +370,6 @@ class CPUBase:
             0b000_00_010100_0000100_000_000_111, 0
         )
 
-    def _mov_y(self) -> None:
-        # mem[address] = Y
-        self._init_instruction("movY", 1)
-        # 45: PC <- PC + 1; fetch; GOTO next
-        self.firmware[self._next_idx] = self._make_instruction(
-            0b000_00_110101_0010000_001_001_000
-        )
-        # 46: MAR <- MBR; GOTO next
-        self.firmware[self._next_idx] = self._make_instruction(
-            0b000_00_010100_1000000_000_010_000
-        )
-        # 47: MDR <- X; write; GOTO main
-        self.firmware[self._next_idx] = self._make_instruction(
-            0b000_00_010100_0100000_100_100_111, 0
-        )
-
     def _x_desl(self) -> None:  # TODO: o mesmo da operação de multiplicação por 2?
         # X = X(deslocado para a direita)
         # 48: X<-X deslocado
@@ -452,8 +455,8 @@ class CPUBase:
         # self._mul_xy()
         # self._div_xy()
         # self._mem_H()
-        # self._set_x()  # X = mem[address]
-        # self._set_y()  # Y = mem[address]
+        self._set_x()  # X = mem[address]
+        self._set_y()  # Y = mem[address]
         # self._mov_y()  # mem[address] = Y
         # self._x_desl()
 
