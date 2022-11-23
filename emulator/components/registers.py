@@ -3,7 +3,7 @@ class Registers:
         self.MPC = 0
         self.MIR = 0
         self.MAR = 0  # | w: 0b1000000
-        self.MDR = 0  # r: 0 | w: 0b0010000
+        self.MDR = 0  # r: 7 | w: 0b0010000
         self.PC = 0  # r: 1 | w: 0b0010000
         self.MBR = 0  # r: 2 | w:
         self.X = 0  # r: 3 | w: 0b0001000
@@ -20,8 +20,8 @@ class Registers:
         """
         # TODO: vê se precisa colocar outros números
         return (
-            [self.MDR, self.PC, self.MBR, self.X, self.Y, self.H, self.K][reg_num]
-            if reg_num in range(7)  # checa se está entre 0 e 6
+            [0, self.PC, self.MBR, self.X, self.Y, self.H, self.K, self.MDR][reg_num]
+            if reg_num in range(8)  # checa se está entre 0 e 6
             else 0
         )
 
