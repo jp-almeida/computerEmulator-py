@@ -36,11 +36,10 @@ class Assembler:
         """
         Transforma em binário as instruções que exigem um argumento (adição, subtração etc)
         """
-        if len(ops) > 1 and self._is_name(ops[0]):
+        if len(ops) > 0 and self._is_name(ops[0]):
             return [self.instruction_set[inst], ops[0]]
 
         raise ValueError("Invalid input ", ops)
-        # TODO: Fazer para os novos registradores
 
     def _encode_goto(self, ops: list) -> list:
         """Encode da operação goto"""
@@ -124,7 +123,7 @@ class Assembler:
 
     def _count_bytes(self, line_number: int) -> int:
         """
-        Conta os butes desde o início até a linha dada.
+        Conta os bytes desde o início até a linha dada.
         É utilizado para achar os bytes dos nomes
         """
         line = 0
@@ -182,14 +181,6 @@ class Assembler:
             self._load_tokens(src)  # carrega os tokens
 
         self._find_line_for_names()  # salva os nomes
-
-            self._lines_to_bin()  # converte todas as linhas para binário
-            self._resolve_names()
-            byte_arr = [0]
-
-            for line in self.lines_bin:
-                for byte in line:
-                    byte_arr.append(byte)  # type: ignore
-
-            with open(self.output_file, "wb") as fdst:
-                fdst.write(bytearray(byte_arr))
+        self._lines_to_bin()  # converte todas as linhas para binário
+        self._resolve_names()
+        self._write_file()
