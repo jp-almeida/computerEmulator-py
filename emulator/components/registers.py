@@ -10,8 +10,6 @@ class Registers:
         self.Y = 0  # r: 4 | w: 0b0000100
         self.H = 0  # r: 5 | w: 0b0000010
         self.K = 0  # r: 6 | w: 0b0000001
-        self.N = 0
-        self.Z = 1
 
     def get_reg(self, reg_num: int) -> int:
         """Retorna o valor do registro para o número dado
@@ -23,7 +21,7 @@ class Registers:
         # TODO: vê se precisa colocar outros números
         return (
             [self.MDR, self.PC, self.MBR, self.X, self.Y, self.H, self.K][reg_num]
-            if reg_num in range(7)
+            if reg_num in range(7)  # checa se está entre 0 e 6
             else 0
         )
 
