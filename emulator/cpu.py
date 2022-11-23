@@ -41,9 +41,9 @@ class CPU(CPUBase):
             ticks += 1
         return ticks
 
-    def _read_registers(self, register_number: int) -> None:
-        self._bus.BUS_A = self._regs.H
-        self._bus.BUS_B = self._regs.get_reg(register_number)
+    def _read_registers(self, regist_B: int, regist_A: int) -> None:
+        self._bus.BUS_A = self._regs.get_reg(regist_A)
+        self._bus.BUS_B = self._regs.get_reg(regist_B)
 
     def _write_registers(self, register_bits: int) -> None:
         self._regs.write_reg(register_bits, self._bus.BUS_C)
