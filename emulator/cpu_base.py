@@ -5,8 +5,8 @@ from typing import Callable, Optional
 class CPUBase:
     def __init__(self) -> None:
         self.firmware = (
-            array("f", [0]) * 512
-        )  #'f' e não "L" porque os números estavam dando maior que L
+            array("Q", [0]) * 512
+        )  #'Q' e não "L" porque temos mais de 32 bits em cada instrução
         self._last_inst_idx = 0
         self._goto_idx: Optional[int] = None  # índice da operação de GOTO
 

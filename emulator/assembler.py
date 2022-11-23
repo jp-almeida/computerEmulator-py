@@ -15,9 +15,10 @@ class Assembler:
         cpu_base = CPUBase()
         self.instruction_set = cpu_base._ops_dict
 
-        self.inst_args_1 = cpu_base._ops_args[1]
-        self.inst_args_0 = cpu_base._ops_args[0]
+        self.inst_args_1 = cpu_base._ops_args[1]  # instruções com 1 argumento
+        self.inst_args_0 = cpu_base._ops_args[0]  # intruções com nenhum argumento
 
+        # todas as instruções
         self.instructions = list(self.instruction_set.keys()) + ["wb", "ww"]
 
     def _is_instruction(self, token: str) -> bool:

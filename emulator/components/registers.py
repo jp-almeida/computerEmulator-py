@@ -20,6 +20,7 @@ class Registers:
         Returns:
             int: valor do registro
         """
+        # TODO: vê se precisa colocar outros números
         return (
             [self.MDR, self.PC, self.MBR, self.X, self.Y, self.H, self.K][reg_num]
             if reg_num in range(7)

@@ -83,7 +83,7 @@ class CPU(CPUBase):
         Retorna:
           bool -> se ainda existe passo a ser executado ou não
         """
-        self._regs.MIR = int(self.firmware[self._regs.MPC])
+        self._regs.MIR = self.firmware[self._regs.MPC]
 
         if self._regs.MIR == 0:
             return False
