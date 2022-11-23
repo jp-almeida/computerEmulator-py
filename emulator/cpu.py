@@ -17,7 +17,6 @@ class CPU(CPUBase):
         self._bus = Bus()
         self._memory = Memory()
         self._last_inst_idx = 0
-        self._control()
 
     def read_image(self, img: str) -> None:
         """Reads a .bin file
@@ -42,13 +41,26 @@ class CPU(CPUBase):
         return ticks
 
     def _read_registers(self, regist_B: int, regist_A: int) -> None:
+        """Lê os registros e armazena o valor nos barramentos A e B
+        Args:
+            regist_B (int): registro cujo valor será armazenado no barramento B
+            regist_A (int): registro cujo valor será armazenado no barramento A
+        """
         self._bus.BUS_A = self._regs.get_reg(regist_A)
         self._bus.BUS_B = self._regs.get_reg(regist_B)
 
     def _write_registers(self, register_bits: int) -> None:
+        """Escreve o valor do registro dado no barramento C
+        Args:
+            register_bits (int): Bits correspondentes ao registro
+        """
         self._regs.write_reg(register_bits, self._bus.BUS_C)
 
     def _alu_operation(self, control_bits: int) -> None:
+        """Executa a operação da ALU e guarda no barramento C
+        Args:
+            control_bits (int): Operação da ALU
+        """
         if not control_bits:
             return
         self._bus.BUS_C = self._alu.operation(
@@ -78,9 +90,16 @@ class CPU(CPUBase):
             self._memory.write_word(self._regs.MAR, self._regs.MDR)
 
     def _print_current_instruction(self, num: int) -> None:
-        for key, n in self._ops_dict.items():
-            if n == num:
-                print(key)
+        """Exibe no prompt mensagens indicando qual a intrução atual da execução do programa"""
+        if not num:
+            print(f"| main ({self._regs.MPC}) {self._regs.MIR}")
+            return
+        else:
+            for key, n in self._ops_dict.items():
+                if n == num:
+                    print(f"| {key} ({num})")
+                    break
+        print(f"\t({self._regs.MPC}) {self._regs.MIR} ")
 
     def _step(self) -> bool:
         """
@@ -89,10 +108,12 @@ class CPU(CPUBase):
           bool -> se ainda existe passo a ser executado ou não
         """
         self._regs.MIR = self.firmware[self._regs.MPC]
+
         self._print_current_instruction(self._regs.MPC)
-        print(self._regs.MIR)
+
         if self._regs.MIR == 0:
             return False
+
         nxt, jam, alu, w_regs, mem, r_regsB, r_regsA = self._parse_instruction(
             self._regs.MIR
         )
