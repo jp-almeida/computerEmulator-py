@@ -337,50 +337,74 @@ class CPUBase:
             0b000_00_010100_0100000_100_100_111, 0, False
         )
 
-    def _x_desl(self) -> None:  # TODO: o mesmo da operação de multiplicação por 2
+    def _x_desl(self) -> None:  # TODO: o mesmo da operação de multiplicação por 2?
         # X = X(deslocado para a direita)
         # 48: X<-X deslocado
         self.firmware[48] = 0b0000000000_001_00_101000_0010000_000_111_11
 
     def _add1_op(self) -> None:
         # TODO: incrementar PC
-        ##49: X <- 1 + X; GOTO 0
-        self.firmware[49] = 0b000000000_000_00_111001_0001000_000_011_000
+        self._init_instruction("add1 x")
+        ##49: X <- 1 + X; GOTO main
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_111001_0001000_000_011_000, 0, False
+        )
 
     def _sub1_op(self) -> None:
         # TODO: incrementar PC
-        ##50: H <- 1; goto 19
-        self.firmware[50] = 0b000010011_000_00_110001_0000010_000_000_000
-        ##51: X <- X - H; goto 0
-        self.firmware[51] = 0b000000000_000_00_111111_0001000_000_011_000
+        self._init_instruction("sub1 x")
+        ##50: H <- 1; GOTO next
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_110001_0000010_000_000_000
+        )
+        ##51: X <- X - H; GOTO main
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_111111_0001000_000_011_000, 0, False
+        )
 
     def _set1_op(self) -> None:
         # TODO: incrementar PC
-        ##52: X <- 1; goto 0
-        self.firmware[52] = 0b000000000_000_00_110001_0001000_000_011_000
+        self._init_instruction("set1 x")
+        ##52: X <- 1; GOTO main
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_110001_0001000_000_011_000, 0, False
+        )
 
     def _set0_op(self) -> None:
         # TODO: incrementar PC
-        ##53: X <- 0; goto 0
-        self.firmware[53] = 0b000000000_000_00_010000_0001000_000_011_000
+        self._init_instruction("set0 x")
+        ##53: X <- 0; GOTO main
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_010000_0001000_000_011_000, 0, False
+        )
 
     def _set_1_op(self) -> None:  # TODO: Not working
         # TODO: incrementar PC
-        ##54: X <- -1; goto 0
-        self.firmware[54] = 0b000000000_000_00_110010_0001000_000_011_000
+        self._init_instruction("set-1 x")
+        ##54: X <- -1; GOTO main
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_110010_0001000_000_011_000, 0, False
+        )
 
     def _div_op(self) -> None:  # TODO: some problems
         # TODO: incrementar PC
-        ##55: X <- X/2; goto 0
-        self.firmware[55] = 0b000000000_000_10_011000_0001000_000_011_000
+        self._init_instruction("div2 x")
+        ##55: X <- X/2; GOTO main
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_10_011000_0001000_000_011_000, 0, False
+        )
 
     def _mul_op(self) -> None:
         # TODO: incrementar PC
-        ##56: X <- X*2; goto 0
-        self.firmware[56] = 0b000000000_000_01_011000_0001000_000_011_000
+        self._init_instruction("mul2 x")
+        ##56: X <- X*2; GOTO main
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_01_011000_0001000_000_011_000, 0, False
+        )
 
     def _halt(self) -> None:
         """Halt instruction"""
+        self._ops_dict["halt"] = 255
         self.firmware[255] = 0b000000000_000_00_000000_0000000_000_000_000
 
     def _control(self) -> None:
