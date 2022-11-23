@@ -46,7 +46,9 @@ class CPUBase:
 
     def _main_op(self) -> None:
         # main: PC <- PC + 1; MBR <- read_byte(PC); GOTO MBR
-        self.firmware[self._last_inst_idx] = 0b000000000_100_00_110101_001000_001_001
+        self.firmware[
+            self._last_inst_idx
+        ] = 0b000000000_100_00_110101_0010000_001_001_000
 
     def _add_op(self) -> None:
         """
