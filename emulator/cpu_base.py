@@ -163,12 +163,13 @@ class CPUBase:
         ## 272: GOTO 13
         # self.firmware[272] = 0b000001101_000_00_000000_000000_000_000
 
-        # if X = 0 goto address
+        # TODO: fazer jz para Y
 
-        self._init_instruction("jz")
+        # if X = 0 goto address
+        self._init_instruction("jz", 1)
         nxt = self._next_idx + 1
         # 11 X <- X; IF ALU = 0 GOTO (next + 256) ELSE GOTO 12 next;
-        self.firmware[self._next_idx] = self._make_instruction(
+        self.firmware[self._next_idx - 1] = self._make_instruction(
             0b001_00_010100_0001000_000_011_000
         )
         # 12 PC <- PC + 1; GOTO MAIN;
@@ -471,6 +472,7 @@ class CPUBase:
         # self._set_1_x()  # x = -1
         # self._div2_x()  # divisão por 2
         # self._mul2_x()  # multiplicação por 2
-        # self._jz()  # if X = 0 then goto address
+
+        self._jz()  # if X = 0 then goto address
 
         self._halt()  # halt
