@@ -167,6 +167,7 @@ class CPUBase:
         )
 
     def _mul_xy(self) -> None:
+        # TODO: incrementar PC
         # H = X * Y (MULTIPLICAÇÃO)         mnemônico sugerido mult
         self._init_instruction("mult")
         # 21: H <- 0; GOTO next
@@ -210,6 +211,7 @@ class CPUBase:
         ] = 0b000000000_000_00_110101_0000000_001_001_000
 
     def _div_xy(self) -> None:
+        # TODO: incrementar PC
         # H= X/Y (DIVISÃO)         mnemônico sugerido div
         # 27: H<-0
         self.firmware[27] = 0b000011100_000_00_010000_0000010_000_000_000
