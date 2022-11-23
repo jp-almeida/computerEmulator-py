@@ -290,13 +290,20 @@ class CPUBase:
         )
 
     def _x_set(self) -> None:
-        # X = mem[address]         mnemônico sugerido set
-        # 39: PC <- PC + 1; MBR <- read_byte(PC); GOTO 40
-        self.firmware[39] = 0b000101000_000_00_110101_0010000_001_001_000
-        # 40: MAR <- MBR; read_word; GOTO 41
-        self.firmware[40] = 0b000101001_000_00_010100_1000000_010_010_000
-        # 41: X <- MDR; GOTO MAIN
-        self.firmware[41] = 0b000000000_000_00_010100_0001000_000_000_111
+        # X = mem[address]
+        self._init_instruction("setx")
+        # 39: PC <- PC + 1; MBR <- read_byte(PC); GOTO next
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_110101_0010000_001_001_000
+        )
+        # 40: MAR <- MBR; read_word; GOTO next
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_010100_1000000_010_010_000
+        )
+        # 41: X <- MDR; GOTO main
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_010100_0001000_000_000_111, 0, False
+        )
 
     def _y_mem(self) -> None:
         # Y = mem[address]
