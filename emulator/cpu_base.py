@@ -6,9 +6,9 @@ class CPUBase:
     def __init__(self) -> None:
         self.firmware = array("L", [0]) * 512
         self._last_inst_idx = 0
-        self._control()
         self._ops_dict: dict[str, int] = {}
         self._goto_idx: Optional[int] = None
+        self._control()
 
     def _make_instruction(
         self, instruction, next_decimal: Optional[int] = None, increment=True
