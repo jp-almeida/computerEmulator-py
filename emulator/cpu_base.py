@@ -307,23 +307,35 @@ class CPUBase:
 
     def _y_mem(self) -> None:
         # Y = mem[address]
-        # 42: PC <- PC + 1; MBR <- read_byte(PC); GOTO 43
-        self.firmware[42] = 0b000101011_000_00_110101_0010000_001_001_000
-        # 43: MAR <- MBR; read_word; GOTO 44
-        self.firmware[43] = 0b000101100_000_00_010100_1000000_010_010_000
+        # 42: PC <- PC + 1; MBR <- read_byte(PC); GOTO next
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_110101_0010000_001_001_000
+        )
+        # 43: MAR <- MBR; read_word; GOTO next
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_010100_1000000_010_010_000
+        )
         # 44: Y <- MDR; GOTO MAIN
-        self.firmware[44] = 0b000000000_000_00_010100_0000100_000_000_111
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_010100_0000100_000_000_111, 0, False
+        )
 
     def _mem_y(self) -> None:
         # mem[address] = Y
-        # 45: PC <- PC + 1; fetch; GOTO 34
-        self.firmware[45] = 0b000101110_000_00_110101_0010000_001_001_000
-        # 46: MAR <- MBR; GOTO 35
-        self.firmware[46] = 0b000101111_000_00_010100_1000000_000_010_000
-        # 47: MDR <- X; write; GOTO MAIN
-        self.firmware[47] = 0b000000000_000_00_010100_0100000_100_100_111
+        # 45: PC <- PC + 1; fetch; GOTO next
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_110101_0010000_001_001_000
+        )
+        # 46: MAR <- MBR; GOTO next
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_010100_1000000_000_010_000
+        )
+        # 47: MDR <- X; write; GOTO main
+        self.firmware[self._last_inst_idx] = self._make_instruction(
+            0b000_00_010100_0100000_100_100_111, 0, False
+        )
 
-    def _x_desl(self) -> None:
+    def _x_desl(self) -> None:  # TODO: o mesmo da operação de multiplicação por 2
         # X = X(deslocado para a direita)
         # 48: X<-X deslocado
         self.firmware[48] = 0b0000000000_001_00_101000_0010000_000_111_11
