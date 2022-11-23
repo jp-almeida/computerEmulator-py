@@ -126,11 +126,11 @@ class CPUBase:
         # mem[address] = Y
         self._init_instruction("movY", 1)
         # 45: PC <- PC + 1; fetch; GOTO next
-        self.firmware[self._next_idx] = self._make_instruction(
+        self.firmware[self._next_idx - 1] = self._make_instruction(
             0b000_00_110101_0010000_001_001_000
         )
         # 46: MAR <- MBR; GOTO next
-        self.firmware[self._next_idx] = self._make_instruction(
+        self.firmware[self._next_idx - 1] = self._make_instruction(
             0b000_00_010100_1000000_000_010_000
         )
         # 47: MDR <- X; write; GOTO main
@@ -444,23 +444,26 @@ class CPUBase:
     def _control(self) -> None:
         """Adiciona todas as operações ao firmware da CPU"""
         # C => MAR, MDR, PC, X, Y, H
-        # B => 000 = MDR, 001 = PC, 010 = MBR, 011 = x, 100 = Y
+        # A,B => 111 = MDR, 001 = PC, 010 = MBR, 011 = x, 100 = Y
         self._main()
-
-        self._add_x()  # X = X + mem[address]
-        # self._sub_x()  # X = X - mem[address]
         self._goto()  # goto address
 
-        self._add_y()
+        self._add_x()  # X = X + mem[address]
+        self._add_y()  # Y = Y + mem[address]
+        # self._sub_x()  # X = X - mem[address]
+
+        self._set_x()  # X = mem[address]
+        self._set_y()  # Y = mem[address]
+
+        self._mov_y()  # mem[address] = Y
+        self._mov_x()  # mem[address] = X
+
         # self._mul_xy()
         # self._div_xy()
         # self._mem_H()
-        self._set_x()  # X = mem[address]
-        self._set_y()  # Y = mem[address]
-        # self._mov_y()  # mem[address] = Y
+
         # self._x_desl()
 
-        # self._mov_x()  # mem[address] = X
         # self._add1_x()  # x = x+1
         # self._sub1_x()  # x = x-1
         # self._set1_x()  # x = 1

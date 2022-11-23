@@ -111,7 +111,7 @@ class Assembler:
         """
         for line in self.lines:
             if not (line_bin := self._line_to_bin(line)):
-                raise SyntaxError("Line ", self.lines.index(line) + 1)
+                raise SyntaxError(f"Line {line}")  # self.lines.index(line) + 1)
             self.lines_bin.append(line_bin)
 
     def _find_line_for_names(self) -> None:

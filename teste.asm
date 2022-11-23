@@ -1,7 +1,9 @@
-goto main
+goto program
 wb 0
 
-a ww 400 #input
+a ww 0
+o ww 123
 
-main addX a #teste um dois tres
+program addY o #teste um dois tres
+    movY a
     halt

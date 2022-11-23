@@ -22,6 +22,7 @@ def teste():
     cpu.read_image("program.bin")
     print("passos ", cpu.execute())
     print("x:", cpu._regs.X)
+    print("y:", cpu._regs.Y)
     print("a:", cpu._memory._memory[1])
 
 
