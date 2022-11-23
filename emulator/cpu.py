@@ -77,6 +77,11 @@ class CPU(CPUBase):
         elif mem_bits & 0b100:
             self._memory.write_word(self._regs.MAR, self._regs.MDR)
 
+    def _print_current_instruction(self, num: int) -> None:
+        for key, n in self._ops_dict.items():
+            if n == num:
+                print(key)
+
     def _step(self) -> bool:
         """
         Executa cada passo
@@ -84,7 +89,8 @@ class CPU(CPUBase):
           bool -> se ainda existe passo a ser executado ou não
         """
         self._regs.MIR = self.firmware[self._regs.MPC]
-
+        self._print_current_instruction(self._regs.MPC)
+        print(self._regs.MIR)
         if self._regs.MIR == 0:
             return False
         nxt, jam, alu, w_regs, mem, r_regsB, r_regsA = self._parse_instruction(
