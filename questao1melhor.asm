@@ -5,26 +5,26 @@ r ww 0 #output
 a ww 400 #input
 v ww 0
 
-main  add x, a 
+main  addX a 
       goto loop
 
-loop  div x #dois
-      mov x, v
-      set0 x
-      add x, v
-      div x #quatro
+loop  div2X #dois
+      movX v
+      set0X
+      addX v
+      div2X #quatro
 
-      mul x
-      mul x
-      sub x, a
-      jz x, biss #bissexto
+      mul2X
+      mul2X
+      subX a
+      jz biss #bissexto
       goto nbiss
 
-biss  set1 x #bissexto
+biss  set1X #bissexto
       goto resp
 
-nbiss set0 x
+nbiss set0X
       goto resp
 
-resp mov x, r
+resp movX r
     halt
