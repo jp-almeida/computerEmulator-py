@@ -158,18 +158,42 @@ class CPUBase:
             0b100_00_010100_0010000_001_010_000, 0
         )
 
-    def _jz(self) -> None:
-        # if X = 0 then goto address
-        ## 15: X <- X; IF ALU = 0 GOTO 272(100010000) ELSE GOTO 16(000010000)
-        # self.firmware[15] = 0b000010000_001_00_010100_000100_000_011
-        ## 16: PC <- PC + 1; GOTO 0
-        # self.firmware[16] = 0b000000000_000_00_110101_001000_000_001
-        ## 272: GOTO 13
-        # self.firmware[272] = 0b000001101_000_00_000000_000000_000_000
+    def _jzK(self) -> None:
+        """
+        jzK <address>
+        Se K for 0, irá para <adress>
+        """
 
-        # TODO: fazer jz para Y
-        # TODO: fazer jz para K
-        # TODO: Ainda não está funcionando
+        # if K = 0 goto address
+        self._init_instruction("jzK", 1, True)
+        is_zero = self._next_idx + 257
+        # 11 IF K = 0 GOTO is_zero ELSE GOTO next;
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b001_00_010100_0001000_000_110_000
+        )
+
+        # K != 0
+        # 12 PC <- PC + 1; GOTO main;
+        self.firmware[self._next_idx] = self._make_instruction(
+            0b000_00_110101_0010000_000_001_000, 0
+        )
+
+        # K == 0
+        # is_zero: PC <- PC + 1; fetch; GOTO next
+        self.firmware[is_zero] = self._make_instruction(
+            0b000_00_110101_0010000_001_001_000, is_zero + 1, False
+        )
+
+        # PC <- MBR; fetch; GOTO MBR;
+        self.firmware[is_zero + 1] = self._make_instruction(
+            0b100_00_010100_0010000_001_010_000, 0
+        )
+
+    def _jzX(self) -> None:
+        """
+        jzX <address>
+        Se X for 0, irá para <adress>
+        """
 
         # if X = 0 goto address
         self._init_instruction("jzX", 1, True)
@@ -185,7 +209,7 @@ class CPUBase:
             0b000_00_110101_0010000_000_001_000, 0
         )
 
-        # X = 0
+        # X == 0
         # is_zero: PC <- PC + 1; fetch; GOTO next
         self.firmware[is_zero] = self._make_instruction(
             0b000_00_110101_0010000_001_001_000, is_zero + 1, False
@@ -541,8 +565,10 @@ class CPUBase:
         # C => MAR, MDR, PC, X, Y, H
         # A,B => 111 = MDR, 001 = PC, 010 = MBR, 011 = x, 100 = Y
         self._main()
-        self._jz()  # if X = 0 then goto address
+
         self._goto()  # goto address
+        self._jzX()  # if X = 0 then goto address
+        self._jzK()  # if K = 0 then goto address
 
         self._add_x()  # X = X + mem[address]
         self._add_y()  # Y = Y + mem[address]
