@@ -91,15 +91,19 @@ class CPU(CPUBase):
 
     def _print_current_instruction(self, num: int) -> None:
         """Exibe no prompt mensagens indicando qual a intrução atual da execução do programa"""
+        b = ("_").join(
+            [bin(inst)[2:] for inst in self._parse_instruction(self._regs.MIR)]
+        )
         if not num:
-            print(f"| main ({self._regs.MPC}) {self._regs.MIR}")
+            print(f"| main ({self._regs.MPC}) ->{b} ")
             return
         else:
             for key, n in self._ops_dict.items():
                 if n == num:
-                    print(f"| {key} ({num})")
+                    print(f"| {key}")
                     break
-        print(f"\t({self._regs.MPC}) {self._regs.MIR} ")
+
+        print(f"\t({self._regs.MPC}) -> {b} ")
 
     def _step(self) -> bool:
         """
