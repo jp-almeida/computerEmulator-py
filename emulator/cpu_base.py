@@ -285,65 +285,78 @@ class CPUBase:
         )
 
     def _div_xy(self) -> None:
-        # TODO: terminar de refatorar
-        # TODO: incrementar PC
-        # H= X/Y (DIVISÃO)         mnemônico sugerido div
+        """divXY
+        Divide o valor de X por Y
+        """
+        # TODO:Não está funcionando
 
-        self._init_instruction("div")
-
-        # 27: H<-0; GOTO next
-        self.firmware[self._next_idx] = self._make_instruction(
+        self._init_instruction("divXY")
+        # Começa zerando H
+        # 34: H<-0; GOTO next
+        self.firmware[self._next_idx - 1] = self._make_instruction(
             0b000_00_010000_0000010_000_000_000
         )
 
-        nxt = self._next_idx + 1
-        # 28: IF Y=0 GOTO nxt+256; ELSE GOTO nxt
-        self.firmware[self._next_idx] = self._make_instruction(
-            0b001_00_010100_0000000_000_100_111
+        # Verifica se a divisão é válida
+        y0 = self._next_idx + 1
+        # 35: IF Y=0 GOTO y0; ELSE GOTO nxt
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b001_00_010100_0000000_000_100_000
         )
-        # 285: GOTO halt (Divisão por 0)
-        self.firmware[nxt + 256] = self._make_instruction(
-            0b000_00_110101_0000000_001_001_000, 255
+        # y0: fetch;GOTO halt (Divisão por 0 -> Encerra o programa)
+        self.firmware[y0 + 256] = self._make_instruction(
+            0b000_00_110101_0000000_001_001_000, 255, False
         )
 
-        nxt = self._next_idx + 1
-        # 29: IF X=0 GOTO nxt + 256; ELSE GOTO nxt
-        self.firmware[self._next_idx] = self._make_instruction(
-            0b001_00_010100_0000000_000_011_111
+        # Verifica se o numerador é 0
+        x0 = self._next_idx + 1
+        mark1 = self._next_idx
+        # 36: IF X=0 GOTO (x0); ELSE GOTO next
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b001_00_010100_0000000_000_011_000
         )
-        # 286: GOTO main
-        self.firmware[nxt + 256] = self._make_instruction(
+        # x0: X<-H; GOTO main
+        self.firmware[x0 + 256] = self._make_instruction(
             0b000_00_110101_0000000_001_001_000, 0
         )
 
-        # 30: K<-0; GOTO next
-        self.firmware[self._next_idx] = self._make_instruction(
-            0b000_00_010000_0000001_000_000_111
+        # Zera K
+        start = self._next_idx
+        # 37: K<-0; GOTO next
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b000_00_010000_0000001_000_000_000
         )
-
-        # 31: K<-K+1; GOTO next
-        self.firmware[self._next_idx] = self._make_instruction(
+        # Incrementa K em 1
+        # 38: K<-K+1; GOTO next
+        self.firmware[self._next_idx - 1] = self._make_instruction(
             0b000_00_111001_0000001_000_000_011
         )
 
-        nxt = self._next_idx + 1
-        # 32: IF Y-K=0 GOTO (nxt+256);ELSE GOTO nxt
-        self.firmware[self._next_idx] = self._make_instruction(
+        y_k0 = self._next_idx + 1
+        # 39: IF Y-K=0 GOTO (y_k0);ELSE GOTO nxt
+        self.firmware[self._next_idx - 1] = self._make_instruction(
             0b001_00_111111_0000000_000_100_011
         )
-
-        # 33: IF (X-K)=0 GOTO 289 ;ELSE GOTO 31
-        self.firmware[33] = 0b000011111_001_00_111111_0000000_000_011_011
-        # 287: GOTO MAIN
-        self.firmware[nxt + 256] = self._make_instruction(
-            0b000_00_110101_0000000_001_001_000, 0
+        # y_k0: X<-H; GOTO MAIN
+        self.firmware[y_k0 + 256] = self._make_instruction(
+            0b000_00_010100_0001000_000_101_000, 0
         )
-        # 35: H <- H+1; GOTO 29
-        self.firmware[35] = 0b000011101_000_00_111001_0000010_000_111_000
 
-        # 289: GOTO 35; X<- X-Y
-        self.firmware[nxt + 256] = self._make_instruction(
-            0b000_00_111111_0001000_000_011_010, self._next_idx, False
+        x_k0 = self._next_idx + 1
+        # 40: IF (X-K)=0 GOTO 289; ELSE GOTO 31
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b001_00_111111_0000000_000_011_011, start
+        )
+
+        mark3 = self._next_idx
+        # 41: H <- H+1; GOTO mark1
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b000_00_111001_0000010_000_111_000, mark1
+        )
+
+        # x_k0: X <- X-Y; GOTO mark3;
+        self.firmware[x_k0 + 256] = self._make_instruction(
+            0b000_00_111111_0001000_000_011_010, mark3, False
         )
 
     def _mem_H(self) -> None:
@@ -485,7 +498,7 @@ class CPUBase:
         self._mov_x()  # mem[address] = X
 
         self._mul_xy()
-        # self._div_xy()
+        self._div_xy()
         # self._mem_H()
 
         # self._x_desl()
