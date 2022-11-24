@@ -553,17 +553,35 @@ class CPUBase:
 
         self._init_instruction("isGreaterXY")
 
+        # -- Verificar se são iguais
+        # IF (X-Y) = 0 GOTO greater, ELSE GOTO next
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b001_00_111111_0000000_000_011_100
+        )
+        equal = self._next_idx + 256
+        # equal: X <- 1; GOTO main
+        self.firmware[equal] = self._make_instruction(
+            0b000_00_110001_0001000_000_000_000, 0
+        )
+
+        # --- Subtrair um de cada. Quem acabar primeiro é o menor
+        loop = self._next_idx
         # Y <- Y-1; if ALU = 0 GOTO greater; ELSE GOTO next
         self.firmware[self._next_idx - 1] = self._make_instruction(
             0b001_00_110110_0000100_000_100_000
         )
         greater = self._next_idx + 256
 
-        # X <- X-1; if ALU = 0 GOTO lower; ELSE GOTO previous
+        # X <- X-1; if ALU = 0 GOTO lower; ELSE GOTO next
         self.firmware[self._next_idx - 1] = self._make_instruction(
-            0b001_00_110110_0001000_000_011_000, self._next_idx - 1
+            0b001_00_110110_0001000_000_011_000
         )
         lower = self._next_idx + 256
+
+        # GOTO loop -> continua a subtração
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b000_00_000000_0000000_000_000_000, loop
+        )
 
         # lower: X <- 0; GOTO main
         self.firmware[lower] = self._make_instruction(
