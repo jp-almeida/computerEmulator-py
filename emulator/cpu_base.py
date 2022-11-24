@@ -458,12 +458,27 @@ class CPUBase:
         self.firmware[48] = 0b0000000000_001_00_101000_0010000_000_111_11
 
     def _add1_x(self) -> None:
-        # TODO: testar
-        # TODO: incrementar PC
+        """
+        add1X
+        X = X + 1
+        Incrementa 1 na variável X
+        """
         self._init_instruction("add1X")
-        ##49: X <- 1 + X; GOTO main
+        ## X <- 1 + X; GOTO main
         self.firmware[self._next_idx] = self._make_instruction(
-            0b000_00_111001_0001000_000_011_000, 0
+            0b000_00_110101_0001000_000_011_000, 0
+        )
+
+    def _add1_y(self) -> None:
+        """
+        add1Y
+        Y = Y + 1
+        Incrementa 1 na variável Y
+        """
+        self._init_instruction("add1Y")
+        ## Y <- 1 + Y; GOTO main
+        self.firmware[self._next_idx] = self._make_instruction(
+            0b000_00_110101_0000100_000_100_000, 0
         )
 
     def _sub1_x(self) -> None:
@@ -563,7 +578,7 @@ class CPUBase:
     def _control(self) -> None:
         """Adiciona todas as operações ao firmware da CPU"""
         # C => MAR, MDR, PC, X, Y, H
-        # A,B => 111 = MDR, 001 = PC, 010 = MBR, 011 = x, 100 = Y
+        # A,B => 111 = MDR, 001 = PC, 010 = MBR, 011 = x, 100 = Y, 110 = K
         self._main()
 
         self._goto()  # goto address
@@ -588,7 +603,8 @@ class CPUBase:
 
         # self._x_desl()
 
-        # self._add1_x()  # x = x+1
+        self._add1_x()  # x = x+1
+        self._add1_y()  # y = y + 1
         # self._sub1_x()  # x = x-1
         # self._set1_x()  # x = 1
         # self._set0_x()  # x = 0
