@@ -287,6 +287,7 @@ class CPUBase:
     def _div_xy(self) -> None:
         """divXY
         Divide o valor de X por Y
+        Escreve o resultado em X
         Para mais detalhes, consultar fluxograma
         """
         # TODO:Não está funcionando
@@ -298,7 +299,7 @@ class CPUBase:
             0b000_00_010000_0000010_000_000_000
         )
 
-        # Verifica se a divisão é válida
+        # Verifica se a divisão é válida (denominador != 0)
         y_is_0 = self._next_idx + 257
         # 35: IF Y=0 GOTO y_is_0; ELSE GOTO nxt
         self.firmware[self._next_idx - 1] = self._make_instruction(
@@ -323,9 +324,9 @@ class CPUBase:
         self.firmware[self._next_idx - 1] = self._make_instruction(
             0b001_00_010100_0000000_000_011_000
         )
-        # end: fetch; GOTO main -> Encerra a operação de divisão. Nesse caso, os números são divisíveis
+        # end: X<-H; fetch; GOTO main -> Encerra a operação de divisão. Nesse caso, os números são divisíveis
         self.firmware[end] = self._make_instruction(
-            0b000_00_110101_0000000_001_001_000, 0
+            0b000_00_010100_0001000_001_101_011, 0
         )
 
         # Incrementa K em 1
