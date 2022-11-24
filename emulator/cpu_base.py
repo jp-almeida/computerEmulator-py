@@ -216,7 +216,25 @@ class CPUBase:
         )
 
     def _sub_y(self) -> None:
-        pass  # TODO: subY
+        """
+        subY v
+        Subtrai v de Y
+        Y = Y - mem[address]
+        """
+        self._init_instruction("subY", 1)
+
+        # PC <- PC + 1; fetch; goto next
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b000_00_110101_0010000_001_001_000
+        )
+        # MAR <- MBR; read; GOTO next;
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b000_00_010100_1000000_010_010_000
+        )
+        # Y <- Y - MDR; GOTO MAIN;
+        self.firmware[self._next_idx] = self._make_instruction(
+            0b000_00_111111_0000100_000_100_111, 0
+        )
 
     def _mul_xy(self) -> None:
         # TODO: incrementar PC
