@@ -482,16 +482,15 @@ class CPUBase:
         )
 
     def _sub1_x(self) -> None:
-        # TODO: incrementar PC
-        # TODO: testar
+        """
+        sub1X
+        X = X - 1
+        Diminui 1 na variável X
+        """
         self._init_instruction("sub1X")
-        ##50: H <- 1; GOTO next
+        ## X <- X - 1; GOTO main
         self.firmware[self._next_idx] = self._make_instruction(
-            0b000_00_110001_0000010_000_000_000
-        )
-        ##51: X <- X - H; GOTO main
-        self.firmware[self._next_idx] = self._make_instruction(
-            0b000_00_111111_0001000_000_011_000, 0
+            0b000_00_110110_0001000_000_011_000, 0
         )
 
     def _set1_x(self) -> None:
@@ -605,7 +604,9 @@ class CPUBase:
 
         self._add1_x()  # x = x+1
         self._add1_y()  # y = y + 1
-        # self._sub1_x()  # x = x-1
+
+        self._sub1_x()  # x = x-1
+
         # self._set1_x()  # x = 1
         # self._set0_x()  # x = 0
         # self._set_1_x()  # x = -1
