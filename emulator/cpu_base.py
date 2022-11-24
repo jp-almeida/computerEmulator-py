@@ -181,12 +181,12 @@ class CPUBase:
 
         # PC <- PC + 1; fetch; GOTO next
         self.firmware[is_zero] = self._make_instruction(
-            0b000_00_110101_0010000_001_001_000, False
+            0b000_00_110101_0010000_001_001_000, is_zero + 1, False
         )
 
         # PC <- MBR; fetch; GOTO MBR;
         self.firmware[is_zero + 1] = self._make_instruction(
-            0b100_00_010100_0010000_001_010_000, False
+            0b100_00_010100_0010000_001_010_000, 0
         )
 
     def _sub_x(self) -> None:
