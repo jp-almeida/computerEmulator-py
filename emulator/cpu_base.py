@@ -290,7 +290,6 @@ class CPUBase:
         Escreve o resultado em X
         Para mais detalhes, consultar fluxograma
         """
-        # TODO:Não está funcionando
 
         self._init_instruction("divXY")
         # Começa zerando H
@@ -424,6 +423,7 @@ class CPUBase:
         self.firmware[48] = 0b0000000000_001_00_101000_0010000_000_111_11
 
     def _add1_x(self) -> None:
+        # TODO: testar
         # TODO: incrementar PC
         self._init_instruction("add1X")
         ##49: X <- 1 + X; GOTO main
@@ -433,6 +433,7 @@ class CPUBase:
 
     def _sub1_x(self) -> None:
         # TODO: incrementar PC
+        # TODO: testar
         self._init_instruction("sub1X")
         ##50: H <- 1; GOTO next
         self.firmware[self._next_idx] = self._make_instruction(
@@ -445,6 +446,7 @@ class CPUBase:
 
     def _set1_x(self) -> None:
         # TODO: incrementar PC
+        # TODO: testar
         self._init_instruction("set1X")
         ##52: X <- 1; GOTO main
         self.firmware[self._next_idx] = self._make_instruction(
@@ -453,6 +455,7 @@ class CPUBase:
 
     def _set0_x(self) -> None:
         # TODO: incrementar PC
+        # TODO: testar
         self._init_instruction("set0X")
         ##53: X <- 0; GOTO main
         self.firmware[self._next_idx] = self._make_instruction(
@@ -461,6 +464,7 @@ class CPUBase:
 
     def _set_1_x(self) -> None:  # TODO: Not working
         # TODO: incrementar PC
+        # TODO: testar
         self._init_instruction("set-1X")
         ##54: X <- -1; GOTO main
         self.firmware[self._next_idx] = self._make_instruction(
@@ -469,6 +473,7 @@ class CPUBase:
 
     def _div2_x(self) -> None:  # TODO: some problems
         # TODO: incrementar PC
+        # TODO: testar
         self._init_instruction("div2X")
         ##55: X <- X/2; GOTO main
         self.firmware[self._next_idx] = self._make_instruction(
@@ -477,6 +482,7 @@ class CPUBase:
 
     def _mul2_x(self) -> None:
         # TODO: incrementar PC
+        # TODO: testar
         self._init_instruction("mul2X")
         ##56: X <- X*2; GOTO main
         self.firmware[self._next_idx] = self._make_instruction(
