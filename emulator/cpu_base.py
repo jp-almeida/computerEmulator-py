@@ -143,7 +143,7 @@ class CPUBase:
         goto <address>
         Vai para a intrução com nome <address>
         """
-        self._init_instruction("goto")
+        self._init_instruction("goto", 1)
         self._goto_idx = self._next_idx
         ##9: PC <- PC + 1; fetch; GOTO 10
         self.firmware[self._next_idx - 1] = self._make_instruction(
@@ -171,21 +171,22 @@ class CPUBase:
         self._init_instruction("jz", 1)
         is_zero = self._next_idx + 257
         # 11 IF X = 0 GOTO is_zero ELSE GOTO next;
-        self.firmware[self._next_idx - 1] = self._make_instruction(
-            0b001_00_010100_0001000_000_011_000
-        )
+        self.firmware[2] = self._make_instruction(0b001_00_010100_0001000_000_011_000)
+
+        # X != 0
         # 12 PC <- PC + 1; GOTO main;
-        self.firmware[self._next_idx] = self._make_instruction(
+        self.firmware[3] = self._make_instruction(
             0b000_00_110101_0010000_000_001_000, 0
         )
 
-        # PC <- PC + 1; fetch; GOTO next
-        self.firmware[is_zero] = self._make_instruction(
+        # X = 0
+        # is_zero: PC <- PC + 1; fetch; GOTO next
+        self.firmware[259] = self._make_instruction(
             0b000_00_110101_0010000_001_001_000, is_zero + 1, False
         )
 
         # PC <- MBR; fetch; GOTO MBR;
-        self.firmware[is_zero + 1] = self._make_instruction(
+        self.firmware[260] = self._make_instruction(
             0b100_00_010100_0010000_001_010_000, 0
         )
 
@@ -534,6 +535,7 @@ class CPUBase:
         # C => MAR, MDR, PC, X, Y, H
         # A,B => 111 = MDR, 001 = PC, 010 = MBR, 011 = x, 100 = Y
         self._main()
+        self._jz()  # if X = 0 then goto address
         self._goto()  # goto address
 
         self._add_x()  # X = X + mem[address]
@@ -561,8 +563,6 @@ class CPUBase:
         # self._set_1_x()  # x = -1
         # self._div2_x()  # divisão por 2
         # self._mul2_x()  # multiplicação por 2
-
-        self._jz()  # if X = 0 then goto address
 
         self._halt()  # halt
 

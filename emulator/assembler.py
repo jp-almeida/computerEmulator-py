@@ -82,9 +82,9 @@ class Assembler:
         """
         Retorna a instrução dada em binário
         """
-        if instruction == "goto":
-            return self._encode_goto(ops)
-        elif instruction == "wb":
+        # if instruction == "goto":
+        #     return self._encode_goto(ops)
+        if instruction == "wb":
             return self._encode_wb(ops)
         elif instruction == "ww":
             return self._encode_ww(ops)
@@ -102,7 +102,9 @@ class Assembler:
         return (
             self._encode_instruction(line[0], line[1:])
             if self._is_instruction(line[0])
-            else self._encode_instruction(line[1], line[2:])
+            else self._encode_instruction(
+                line[1], line[2:]
+            )  # casos que tem um marcador antes
         )
 
     def _lines_to_bin(self) -> None:
@@ -149,7 +151,11 @@ class Assembler:
                     line[i] = self._get_name_byte(line[i]) // (  # type: ignore
                         4
                         if line[i - 1]  # type: ignore
-                        in [self.instruction_set[op] for op in self.inst_args_1]
+                        in [
+                            self.instruction_set[op]
+                            for op in self.inst_args_1
+                            if op not in ("goto", "jz")
+                        ]
                         else 1
                     )
 
