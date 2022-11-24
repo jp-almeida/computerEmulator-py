@@ -484,20 +484,29 @@ class CPUBase:
         Verifica se X > Y. Caso positivo, aloca 1 em X. Caso negativo, 0.
         Se são iguais, dirá que é maior.
         """
-        """
-        3-4 = -1
-        -1 -1 = -2
 
-        4-3 = 1
-        1-1 = 0
-        """
-        # H <- A-B
-        self.firmware[self._next_idx] = self._make_instruction(
-            0b000_00_111111_0001000_000_011_010
+        self._init_instruction("isGreaterXY")
+
+        # Y <- Y-1; if ALU = 0 GOTO greater; ELSE GOTO next
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b001_00_110110_0000100_000_100_000
         )
-        # IF (H-H) = 0 GOTO true; else GOTO false
-        # true: X<-1; GOTO main
-        # false: X<-0; GOTO main
+        greater = self._next_idx + 256
+
+        # X <- X-1; if ALU = 0 GOTO lower; ELSE GOTO previous
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b001_00_110110_0001000_000_011_000, self._next_idx - 1
+        )
+        lower = self._next_idx + 256
+
+        # lower: X <- 0; GOTO main
+        self.firmware[lower] = self._make_instruction(
+            0b000_00_010000_0001000_000_000_011, 0
+        )
+        # greater: X <- 1; GOTO main
+        self.firmware[greater] = self._make_instruction(
+            0b000_00_110001_0001000_000_000_011, 0
+        )
 
     def _control(self) -> None:
         """Adiciona todas as operações ao firmware da CPU"""
@@ -535,3 +544,5 @@ class CPUBase:
         self._jz()  # if X = 0 then goto address
 
         self._halt()  # halt
+
+        self.is_greater_xy()
