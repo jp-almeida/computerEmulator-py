@@ -171,22 +171,24 @@ class CPUBase:
         self._init_instruction("jz", 1)
         is_zero = self._next_idx + 257
         # 11 IF X = 0 GOTO is_zero ELSE GOTO next;
-        self.firmware[2] = self._make_instruction(0b001_00_010100_0001000_000_011_000)
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b001_00_010100_0001000_000_011_000
+        )
 
         # X != 0
         # 12 PC <- PC + 1; GOTO main;
-        self.firmware[3] = self._make_instruction(
+        self.firmware[self._next_idx] = self._make_instruction(
             0b000_00_110101_0010000_000_001_000, 0
         )
 
         # X = 0
         # is_zero: PC <- PC + 1; fetch; GOTO next
-        self.firmware[259] = self._make_instruction(
+        self.firmware[is_zero] = self._make_instruction(
             0b000_00_110101_0010000_001_001_000, is_zero + 1, False
         )
 
         # PC <- MBR; fetch; GOTO MBR;
-        self.firmware[260] = self._make_instruction(
+        self.firmware[is_zero + 1] = self._make_instruction(
             0b100_00_010100_0010000_001_010_000, 0
         )
 
