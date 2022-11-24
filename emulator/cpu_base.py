@@ -15,7 +15,7 @@ class CPUBase:
         self._ops_dict: dict[str, int] = {}
         # operações agrupadas pelo número de argumentos.
         self._ops_args: dict[int, list[str]] = {}
-
+        self._ops_move: list[str] = []
         self._control()  # adiciona as instruções
 
     def _make_instruction(
@@ -42,12 +42,13 @@ class CPUBase:
             self._next_idx += 1
         return (next_decimal << 27) + instruction
 
-    def _init_instruction(self, name: str, args: int = 0) -> None:
+    def _init_instruction(self, name: str, args: int = 0, move=False) -> None:
         """Chamada no início de toda instrução. Incrementa o último índice de instrução
         e guarda o valor no dicionário de instruções
         Args:
             name (str): Nome da nova instrução
             args (int, optional): Número de argumentos da instrução. Padrão é 0
+            move(bool, optional): Indicação se a operação realiza algum deslocamento especial (ex: jz e goto). Padrão é False
         """
         self._next_idx += 1
         self._ops_dict[name] = self._next_idx
@@ -56,6 +57,9 @@ class CPUBase:
             self._ops_args[args].append(name)
         else:
             self._ops_args[args] = [name]
+
+        if move:
+            self._ops_move.append(name)
 
     def _main(self) -> None:
         # main: PC <- PC + 1; MBR <- read_byte(PC); GOTO MBR
@@ -143,7 +147,7 @@ class CPUBase:
         goto <address>
         Vai para a intrução com nome <address>
         """
-        self._init_instruction("goto", 1)
+        self._init_instruction("goto", 1, True)
         self._goto_idx = self._next_idx
         ##9: PC <- PC + 1; fetch; GOTO 10
         self.firmware[self._next_idx - 1] = self._make_instruction(
@@ -168,7 +172,7 @@ class CPUBase:
         # TODO: Ainda não está funcionando
 
         # if X = 0 goto address
-        self._init_instruction("jz", 1)
+        self._init_instruction("jzX", 1, True)
         is_zero = self._next_idx + 257
         # 11 IF X = 0 GOTO is_zero ELSE GOTO next;
         self.firmware[self._next_idx - 1] = self._make_instruction(

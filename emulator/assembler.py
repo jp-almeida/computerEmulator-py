@@ -17,7 +17,7 @@ class Assembler:
 
         self.inst_args_1 = cpu_base._ops_args[1]  # instruções com 1 argumento
         self.inst_args_0 = cpu_base._ops_args[0]  # intruções com nenhum argumento
-
+        self.inst_move = cpu_base._ops_move  # recebem como argumento um marcador
         # todas as instruções
         self.instructions = list(self.instruction_set.keys()) + ["wb", "ww"]
 
@@ -154,7 +154,7 @@ class Assembler:
                         in [
                             self.instruction_set[op]
                             for op in self.inst_args_1
-                            if op not in ("goto", "jz")
+                            if op not in self.inst_move
                         ]
                         else 1
                     )
