@@ -549,6 +549,9 @@ class CPUBase:
         isGreaterXY
         Verifica se X > Y. Caso positivo, aloca 1 em X. Caso negativo, 0.
         Se são iguais, dirá que é maior.
+
+        Atenção:
+        Não funciona para variáveis negativas ou nulas
         """
 
         self._init_instruction("isGreaterXY")

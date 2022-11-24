@@ -2,62 +2,39 @@ goto main
 wb 0
  
 r ww 0 #output
-a ww 100 #input->numero_para_achar_a_raiz_quadrada
-c ww 1 #contagem_multiplicacao
-d ww 1 #numero_que_esta_sendo_multiplicado_por_ele_mesmo
-g ww 0 #resultado_de_cada_multiplicacao
+a ww 3 #input
+d ww 1 #numero que esta sendo multiplicado por ele mesmo
+last_d ww 0 #ultimo numero que foi multiplicado
 
-main add x, a
-     mov x, r
-     jz x, final #eh_zero
-     sub1 x
-     jz x, final #eh_um
+main setX d
+     setY d
+     goto multip
 
-     #começar_multiplicando_2_por_ele_mesmo
-     set0 x
-     add1 x
-     add1 x
-     mov x, d
-     goto mult
+multip    multXY 
+          movX r #guarda o valor da multiplicacao em r
+          setY a 
 
-#multiplica_um_numero_por_ele_mesmo
-mult add x, d
-     mov x, g
-     
-     #incrementa_o_num_de_parcelas
-     set0 x
-     add x, c
-     add1 x
-     mov x, c
-     
-     #verifica_se_o_num_de_parcelas_eh_o_esperado
-     sub x, d
-     jz x, comp #multiplicou_tudo_(verificar_se_achou_o_numero)
-    
-     #continua_a_multiplicacao
-     set0 x
-     add x, g
-     goto mult
+          #verifica se achou o numero desejado
+          setX r
+          subX a
+          jzX final #se são iguais, finaliza
 
-#ir_para_o_proximo_numero
-prox add x, d
-     add1 x
-     mov x, d
-     
-     #zera_as_parcelas_e_o_resultado_da_multiplicacao
-     set0 x
-     mov x, c
-     mov x, g
-     
-     goto mult
+          #verifica se é maior
+          setX r
+          isGreaterXY
+          jzX inc #se é menor, continua
+          #caso contrario, diminui D (para fazer o chão da raiz quadrada)
+          setX d
+          sub1X
+          movX r
+          halt
 
-#verifica_se_achou_o_numero_esperado
-comp add x, g
-    sub x, a
-    jz x, final
-    set0 x
-    goto prox #vai_para_o_prox_numero
+inc       setY d
+          add1Y
+          movY d
+          setX d
+          goto main
 
-final add x, d
-    mov x, r
-    halt
+final     setX d
+          movX r
+          halt
