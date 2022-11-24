@@ -231,13 +231,10 @@ class CPUBase:
         """
         multXY
         Multiplica os valores de X por Y
-        # TODO: Para onde vai o valor?
+        Guarda o resultado em X
         """
         self._init_instruction("multXY")
-        # PC <- PC + 1; MBR <- read_byte(PC); GOTO next
-        # self.firmware[self._next_idx - 1] = self._make_instruction(
-        #     0b000_00_110101_0010000_001_001_000
-        # )
+
         # Zera H (será usado para incrementar os valores)
         # 28: H <- 0; GOTO next
         self.firmware[self._next_idx - 1] = self._make_instruction(
@@ -250,18 +247,18 @@ class CPUBase:
         self.firmware[self._next_idx - 1] = self._make_instruction(
             0b001_00_010100_0000000_000_011_000
         )
-        # (nxt+256): PC <- PC + 1; GOTO main
+        # (nxt+256): X<-H fetch; GOTO main
         self.firmware[nxt + 256] = self._make_instruction(
-            0b000_00_110101_0010000_000_001_000, 0
+            0b000_00_010100_0001000_000_101_000, 0
         )
         nxt = self._next_idx + 1
         # 30: IF Y=0 Goto (nxt + 256) ;ELSE Goto 24
         self.firmware[self._next_idx - 1] = self._make_instruction(
             0b001_00_010100_0000000_000_100_000
         )
-        # (nxt+256): PC <- PC + 1; GOTO main
+        # 287: X<-H;fetch; GOTO main
         self.firmware[nxt + 256] = self._make_instruction(
-            0b000_00_110101_0010000_000_001_000, 0
+            0b000_00_010100_0001000_000_101_000, 0
         )
 
         # A cada vez que somar X em H, diminuirá 1 de Y e verificará se este é 0
@@ -282,10 +279,10 @@ class CPUBase:
         )
 
         # (nxt+256): PC <- PC + 1; GOTO main
+        # X <- H; GOTO main
         self.firmware[nxt + 256] = self._make_instruction(
-            0b000_00_110101_0000000_001_001_000, 0
+            0b000_00_010100_0001000_000_101_000, 0
         )
-        # self._make_instruction(0b000_00_110101_0000000_001_001_000, 0)
 
     def _div_xy(self) -> None:
         # TODO: terminar de refatorar
