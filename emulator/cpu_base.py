@@ -287,6 +287,7 @@ class CPUBase:
     def _div_xy(self) -> None:
         """divXY
         Divide o valor de X por Y
+        Para mais detalhes, consultar fluxograma
         """
         # TODO:Não está funcionando
 
@@ -298,65 +299,74 @@ class CPUBase:
         )
 
         # Verifica se a divisão é válida
-        y0 = self._next_idx + 1
-        # 35: IF Y=0 GOTO y0; ELSE GOTO nxt
+        y_is_0 = self._next_idx + 257
+        # 35: IF Y=0 GOTO y_is_0; ELSE GOTO nxt
         self.firmware[self._next_idx - 1] = self._make_instruction(
             0b001_00_010100_0000000_000_100_000
         )
-        # y0: fetch;GOTO halt (Divisão por 0 -> Encerra o programa)
-        self.firmware[y0 + 256] = self._make_instruction(
+        # y_is_0: fetch; GOTO halt (Divisão por 0 -> Encerra o programa)
+        self.firmware[y_is_0] = self._make_instruction(
             0b000_00_110101_0000000_001_001_000, 255, False
         )
 
-        # Verifica se o numerador é 0
-        x0 = self._next_idx + 1
-        mark1 = self._next_idx
-        # 36: IF X=0 GOTO (x0); ELSE GOTO next
-        self.firmware[self._next_idx - 1] = self._make_instruction(
-            0b001_00_010100_0000000_000_011_000
-        )
-        # x0: fetch; GOTO main
-        self.firmware[x0 + 256] = self._make_instruction(
-            0b000_00_110101_0000000_001_001_000, 0
-        )
-
         # Zera K
-        start = self._next_idx
+        start = self._next_idx  # onde inicia cada divisão
         # 37: K<-0; GOTO next
         self.firmware[self._next_idx - 1] = self._make_instruction(
             0b000_00_010000_0000001_000_000_000
         )
-        # Incrementa K em 1
-        # 38: K<-K+1; GOTO next
+
+        # Verifica se o numerador é 0
+        end = self._next_idx + 257
+        start_div = self._next_idx  # onde inicia o loop de cada divisão
+        # start_div: IF X=0 GOTO (end); ELSE GOTO next
         self.firmware[self._next_idx - 1] = self._make_instruction(
-            0b000_00_111001_0000001_000_000_011
+            0b001_00_010100_0000000_000_011_000
+        )
+        # end: fetch; GOTO main -> Encerra a operação de divisão. Nesse caso, os números são divisíveis
+        self.firmware[end] = self._make_instruction(
+            0b000_00_110101_0000000_001_001_000, 0
         )
 
-        y_k0 = self._next_idx + 1
+        # Incrementa K em 1
+        inc_K = self._next_idx
+        # 38 inc_K: K<-K+1; GOTO next
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b000_00_111001_0000001_000_000_110
+        )
+
+        # Verifica se K já alcançou Y. Caso tenha alcançado, diminui X
+        inc_H = self._next_idx + 257
         # 39: IF Y-K=0 GOTO (y_k0);ELSE GOTO nxt
         self.firmware[self._next_idx - 1] = self._make_instruction(
-            0b001_00_111111_0000000_000_100_011
-        )
-        # y_k0: fetch; GOTO MAIN
-        self.firmware[y_k0 + 256] = self._make_instruction(
-            0b000_00_010100_0001000_001_000_000, 0
+            0b001_00_111111_0000000_000_100_110
         )
 
-        x_k0 = self._next_idx + 1
-        # 40: IF (X-K)=0 GOTO 289; ELSE GOTO 31
+        # > K != Y
+        # Verifica se K é X.
+        # Caso não seja, continua a divisão (incrementando K)
+        # Caso seja, encerra a divisão e isso indica que os números não são divisíveis
+        x_equal_k = self._next_idx + 257
+        # 40: IF (X-K)=0 GOTO 289; ELSE GOTO inc_K
         self.firmware[self._next_idx - 1] = self._make_instruction(
-            0b001_00_111111_0000000_000_011_110, start
+            0b001_00_111111_0000000_000_011_110, inc_K
         )
 
-        mark3 = self._next_idx
-        # 41: H <- H+1; GOTO mark1
-        self.firmware[self._next_idx - 1] = self._make_instruction(
-            0b000_00_111001_0000010_000_101_000, mark1
+        # >> K = X -> Não divisível
+        # fetch, GOTO end -> Encerra a operação de divisão
+        self.firmware[x_equal_k] = self._make_instruction(
+            0b000_00_110101_0000000_001_001_000, 0
         )
 
-        # x_k0: X <- X-Y; GOTO mark3;
-        self.firmware[x_k0 + 256] = self._make_instruction(
-            0b000_00_111111_0001000_000_011_100, mark3, False
+        # > K = Y
+        # inc_H: H <- H+1; GOTO sub_XY
+        self.firmware[inc_H] = self._make_instruction(
+            0b000_00_111001_0000010_000_101_000,
+        )
+
+        # sub_XY: X <- X-Y; GOTO start
+        self.firmware[self._next_idx] = self._make_instruction(
+            0b000_00_111111_0001000_000_011_100, start, False
         )
 
     def _mem_H(self) -> None:
