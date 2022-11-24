@@ -164,25 +164,29 @@ class CPUBase:
         # self.firmware[272] = 0b000001101_000_00_000000_000000_000_000
 
         # TODO: fazer jz para Y
+        # TODO: fazer jz para K
         # TODO: Ainda não está funcionando
 
         # if X = 0 goto address
         self._init_instruction("jz", 1)
-        nxt = self._next_idx + 1
-        # 11 X <- X; IF ALU = 0 GOTO (next + 256) ELSE GOTO 12 next;
+        is_zero = self._next_idx + 257
+        # 11 IF X = 0 GOTO is_zero ELSE GOTO next;
         self.firmware[self._next_idx - 1] = self._make_instruction(
             0b001_00_010100_0001000_000_011_000
         )
-        # 12 PC <- PC + 1; GOTO MAIN;
+        # 12 PC <- PC + 1; GOTO main;
         self.firmware[self._next_idx] = self._make_instruction(
             0b000_00_110101_0010000_000_001_000, 0
         )
 
-        if self._goto_idx is None:
-            raise ValueError(f"'goto' operation must be defined before 'jz'")
-        # 268: GOTO goto
-        self.firmware[nxt + 256] = self._make_instruction(
-            0b000_00_000000_0000000_000_000_000, self._goto_idx, False
+        # PC <- PC + 1; fetch; GOTO next
+        self.firmware[is_zero] = self._make_instruction(
+            0b000_00_110101_0010000_001_001_000, False
+        )
+
+        # PC <- MBR; fetch; GOTO MBR;
+        self.firmware[is_zero + 1] = self._make_instruction(
+            0b100_00_010100_0010000_001_010_000, False
         )
 
     def _sub_x(self) -> None:
@@ -325,7 +329,7 @@ class CPUBase:
         )
         # end: X<-H; fetch; GOTO main -> Encerra a operação de divisão. Nesse caso, os números são divisíveis
         self.firmware[end] = self._make_instruction(
-            0b000_00_010100_0001000_001_101_011, 0
+            0b000_00_010100_0001000_001_101_000, 0
         )
 
         # Incrementa K em 1
