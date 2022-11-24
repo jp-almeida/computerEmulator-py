@@ -315,7 +315,7 @@ class CPUBase:
         self.firmware[self._next_idx - 1] = self._make_instruction(
             0b001_00_010100_0000000_000_011_000
         )
-        # x0: X<-H; GOTO main
+        # x0: fetch; GOTO main
         self.firmware[x0 + 256] = self._make_instruction(
             0b000_00_110101_0000000_001_001_000, 0
         )
@@ -337,26 +337,26 @@ class CPUBase:
         self.firmware[self._next_idx - 1] = self._make_instruction(
             0b001_00_111111_0000000_000_100_011
         )
-        # y_k0: X<-H; GOTO MAIN
+        # y_k0: fetch; GOTO MAIN
         self.firmware[y_k0 + 256] = self._make_instruction(
-            0b000_00_010100_0001000_000_101_000, 0
+            0b000_00_010100_0001000_001_000_000, 0
         )
 
         x_k0 = self._next_idx + 1
         # 40: IF (X-K)=0 GOTO 289; ELSE GOTO 31
         self.firmware[self._next_idx - 1] = self._make_instruction(
-            0b001_00_111111_0000000_000_011_011, start
+            0b001_00_111111_0000000_000_011_110, start
         )
 
         mark3 = self._next_idx
         # 41: H <- H+1; GOTO mark1
         self.firmware[self._next_idx - 1] = self._make_instruction(
-            0b000_00_111001_0000010_000_111_000, mark1
+            0b000_00_111001_0000010_000_101_000, mark1
         )
 
         # x_k0: X <- X-Y; GOTO mark3;
         self.firmware[x_k0 + 256] = self._make_instruction(
-            0b000_00_111111_0001000_000_011_010, mark3, False
+            0b000_00_111111_0001000_000_011_100, mark3, False
         )
 
     def _mem_H(self) -> None:
@@ -477,6 +477,27 @@ class CPUBase:
         self._ops_dict["halt"] = 255
         self._ops_args[0].append("halt")
         self.firmware[255] = 0b000000000_000_00_000000_0000000_000_000_000
+
+    def is_greater_xy(self) -> None:
+        """
+        isGreaterXY
+        Verifica se X > Y. Caso positivo, aloca 1 em X. Caso negativo, 0.
+        Se são iguais, dirá que é maior.
+        """
+        """
+        3-4 = -1
+        -1 -1 = -2
+
+        4-3 = 1
+        1-1 = 0
+        """
+        # H <- A-B
+        self.firmware[self._next_idx] = self._make_instruction(
+            0b000_00_111111_0001000_000_011_010
+        )
+        # IF (H-H) = 0 GOTO true; else GOTO false
+        # true: X<-1; GOTO main
+        # false: X<-0; GOTO main
 
     def _control(self) -> None:
         """Adiciona todas as operações ao firmware da CPU"""
