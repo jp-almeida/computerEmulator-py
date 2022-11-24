@@ -164,6 +164,7 @@ class CPUBase:
         # self.firmware[272] = 0b000001101_000_00_000000_000000_000_000
 
         # TODO: fazer jz para Y
+        # TODO: Ainda não está funcionando
 
         # if X = 0 goto address
         self._init_instruction("jz", 1)
@@ -202,16 +203,16 @@ class CPUBase:
         self._init_instruction("subX", 1)
 
         # PC <- PC + 1; fetch; goto next
-        self.firmware[self._next_idx] = self._make_instruction(
+        self.firmware[self._next_idx - 1] = self._make_instruction(
             0b000_00_110101_0010000_001_001_000
         )
         # MAR <- MBR; read; GOTO next;
-        self.firmware[self._next_idx] = self._make_instruction(
+        self.firmware[self._next_idx - 1] = self._make_instruction(
             0b000_00_010100_1000000_010_010_000
         )
         # X <- X - MDR; GOTO MAIN;
         self.firmware[self._next_idx] = self._make_instruction(
-            0b000_00_111111_0001000_000_011_100, 0
+            0b000_00_111111_0001000_000_011_111, 0
         )
 
     def _sub_y(self) -> None:
@@ -451,7 +452,9 @@ class CPUBase:
 
         self._add_x()  # X = X + mem[address]
         self._add_y()  # Y = Y + mem[address]
-        # self._sub_x()  # X = X - mem[address]
+
+        self._sub_x()  # X = X - mem[address]
+        self._sub_y()  # Y = Y - mem[address]
 
         self._set_x()  # X = mem[address]
         self._set_y()  # Y = mem[address]
