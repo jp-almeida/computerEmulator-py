@@ -530,34 +530,54 @@ class CPUBase:
             0b000_01_010100_0001000_000_011_000, 0
         )
 
-    def _div_x_4(self) -> None:
-        """Divide X por 4. Armazena o resto da divisão em K"""
-        self._init_instruction("div4X")
+    def _div_x_16(self) -> None:
+        """Divide X por 16. Armazena o resto da divisão em K"""
+        self._init_instruction("div16X")
         ##H <- X; GOTO next
         self.firmware[self._next_idx - 1] = self._make_instruction(
             0b000_00_010100_0000010_000_011_000
         )
-        ##X <- X/2; GOTO next
-        self.firmware[self._next_idx - 1] = self._make_instruction(
-            0b000_10_010100_0001000_000_011_000
-        )
-        ##X <- X/2; GOTO next
-        self.firmware[self._next_idx - 1] = self._make_instruction(
-            0b000_10_010100_0001000_000_011_000
-        )
 
-        ##K <- X*2; GOTO next
-        self.firmware[self._next_idx - 1] = self._make_instruction(
-            0b000_01_010100_0000001_000_011_000
-        )
-        ##K <- K*2; GOTO next
-        self.firmware[self._next_idx - 1] = self._make_instruction(
-            0b000_01_010100_0000001_000_110_000
-        )
+        for i in range(3):
+            ##X <- X/2; GOTO next
+            self.firmware[self._next_idx - 1] = self._make_instruction(
+                0b000_10_010100_0001000_000_011_000
+            )
 
-        ##K <- H-K; GOTO main
+        ##X <- X/2;GOTO main
         self.firmware[self._next_idx] = self._make_instruction(
-            0b000_00_111111_0000001_000_101_110, 0
+            0b000_10_010100_0001000_000_011_000, 0
+        )
+
+        # ##K <- X*2; GOTO next
+        # self.firmware[self._next_idx - 1] = self._make_instruction(
+        #     0b000_01_010100_0000001_000_011_000
+        # )
+        # for i in range(2):
+        #     ##K <- K*2; GOTO next
+        #     self.firmware[self._next_idx - 1] = self._make_instruction(
+        #         0b000_01_010100_0000001_000_110_000
+        #     )
+
+        # ##K <- H-K; GOTO main
+        # self.firmware[self._next_idx] = self._make_instruction(
+        #     0b000_00_111111_0000001_000_101_110, 0
+        # )
+
+    def _andX(self) -> None:
+        """K <- X & <input>"""
+        self._init_instruction("andX", 1)
+        # PC <- PC + 1; MBR <- read_byte(PC); GOTO next
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b000_00_110101_0010000_001_001_000
+        )
+        # MAR <- MBR; read_word; GOTO next
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b000_00_010100_1000000_010_010_000
+        )
+        # K <- X and MDR; GOTO main;
+        self.firmware[self._next_idx] = self._make_instruction(
+            0b000_00_001100_0000001_000_111_011, 0
         )
 
     def _halt(self) -> None:
@@ -643,9 +663,11 @@ class CPUBase:
         self._set0_x()  # x = 0
         # self._set_1_x()  # x = -1
 
-        self._div2_x()  # divisão por 2
-        self._mul2_x()  # multiplicação por 2
-        self._div_x_4()  # divisão de x por 4
+        self._mul2_x()  # multiplicação de x por 2
+
+        self._div2_x()  # divisão de x por 2
+        self._div_x_16()  # divisão de x por 16
+        self._andX()
         self._halt()  # halt
 
         self.is_greater_xy()
