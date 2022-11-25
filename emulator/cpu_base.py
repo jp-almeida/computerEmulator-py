@@ -530,6 +530,36 @@ class CPUBase:
             0b000_01_010100_0001000_000_011_000, 0
         )
 
+    def _div_x_4(self) -> None:
+        """Divide X por 4. Armazena o resto da divisão em K"""
+        self._init_instruction("div4X")
+        ##H <- X; GOTO next
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b000_00_010100_0000010_000_011_000
+        )
+        ##X <- X/2; GOTO next
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b000_10_010100_0001000_000_011_000
+        )
+        ##X <- X/2; GOTO next
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b000_10_010100_0001000_000_011_000
+        )
+
+        ##K <- X*2; GOTO next
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b000_01_010100_0000001_000_011_000
+        )
+        ##K <- K*2; GOTO next
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b000_01_010100_0000001_000_110_000
+        )
+
+        ##K <- H-K; GOTO main
+        self.firmware[self._next_idx] = self._make_instruction(
+            0b000_00_111111_0000001_000_101_110, 0
+        )
+
     def _halt(self) -> None:
         """Halt instruction"""
         self._ops_dict["halt"] = 255
@@ -615,7 +645,7 @@ class CPUBase:
 
         self._div2_x()  # divisão por 2
         self._mul2_x()  # multiplicação por 2
-
+        self._div_x_4()  # divisão de x por 4
         self._halt()  # halt
 
         self.is_greater_xy()
