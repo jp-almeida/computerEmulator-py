@@ -11,17 +11,18 @@ main      setX d
 
 multip    multXY 
           movX out #guarda o valor da multiplicacao em in_out
-          setY in_out 
-
+          
           #verifica se achou o numero desejado
           setX in_out
           subX out
           jzX final #se são iguais, finaliza
 
           #verifica se é maior
+          setY in_out 
           setX out
           isGreaterXY
           jzX inc #se é menor, continua
+          
           #caso contrario, diminui D (para fazer o chão da raiz quadrada)
           setX d
           sub1X
@@ -32,7 +33,7 @@ inc       setY d
           add1Y
           movY d
           setX d
-          goto main
+          goto multip
 
 final     setX d
           movX in_out
