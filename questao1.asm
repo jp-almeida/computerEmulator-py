@@ -4,6 +4,7 @@ wb 0
 in_out ww 2022 #input e output
 cem ww 100
 qrtcents ww 400
+dois ww 2
 
 #verificar se é divisivel por 400
 main            setX in_out
@@ -14,7 +15,7 @@ main            setX in_out
 
 #verificar se é divisivel por 4
 div4            setX in_out
-                div4X
+                andX dois
                 jzK biss
                 goto nao_biss
 

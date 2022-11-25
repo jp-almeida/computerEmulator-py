@@ -4,8 +4,8 @@ contrário, guarde 0.
 
 | Entrada | Passos|
 |----------|--------|
-| 2022 | 6127|
-|2016 | 6107 |
+| 2022 | 6124|
+|2016 | 6104 |
 
 
 
@@ -28,5 +28,6 @@ calcule ⌊√n⌋ e guarde o resultado de volta na word 1.
 
 | Entrada | Passos|
 |----------|--------|
-| 100  | 1587 |
-|25|412|
+| 100  | 1497 |
+|25|372|
+|16|261|
