@@ -41,6 +41,14 @@ class ALU:
             operation & 0b00000001,  # inc
         )
 
+    @staticmethod
+    def _parse_operation2(operation: int) -> tuple:
+
+        return (
+            (operation & 0b11000000) >> 6,  # shift_bits
+            (operation & 0b00111111),  # control bits
+        )
+
     def operation(self, control_bits: int, a: int, b: int) -> int:
         """Instruções para a operação da ULA
         Args:
@@ -50,8 +58,8 @@ class ALU:
         Returns:
             int: Resultado da operação
         """
-        shift_bits, op, en_a, en_b, inv_a, inc = self._parse_operation(control_bits)
-
+        # shift_bits, op, en_a, en_b, inv_a, inc = self._parse_operation(control_bits)
+        shift_bits, control_bits = self._parse_operation2(control_bits)
         # if op == 0b01:
         #     res = ((-a if inv_a else a) if en_a else 0) | (b if en_b else 0)
         # elif op == 0b11:  # soma

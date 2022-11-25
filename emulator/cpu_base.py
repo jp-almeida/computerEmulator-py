@@ -526,12 +526,10 @@ class CPUBase:
         )
 
     def _mul2_x(self) -> None:
-        # TODO: incrementar PC
-        # TODO: testar
         self._init_instruction("mul2X")
         ##56: X <- X*2; GOTO main
         self.firmware[self._next_idx] = self._make_instruction(
-            0b000_01_011000_0001000_000_011_000, 0
+            0b000_01_010100_0001000_000_011_000, 0
         )
 
     def _halt(self) -> None:
@@ -617,7 +615,7 @@ class CPUBase:
         self._set0_x()  # x = 0
         # self._set_1_x()  # x = -1
         # self._div2_x()  # divisão por 2
-        # self._mul2_x()  # multiplicação por 2
+        self._mul2_x()  # multiplicação por 2
 
         self._halt()  # halt
 
