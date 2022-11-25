@@ -494,17 +494,13 @@ class CPUBase:
         )
 
     def _set1_x(self) -> None:
-        # TODO: incrementar PC
-        # TODO: testar
         self._init_instruction("set1X")
         ##52: X <- 1; GOTO main
         self.firmware[self._next_idx] = self._make_instruction(
-            0b000_00_110001_0001000_000_011_000, 0
+            0b000_00_110001_0001000_000_000_000, 0
         )
 
     def _set0_x(self) -> None:
-        # TODO: incrementar PC
-        # TODO: testar
         self._init_instruction("set0X")
         ##53: X <- 0; GOTO main
         self.firmware[self._next_idx] = self._make_instruction(
@@ -617,8 +613,8 @@ class CPUBase:
 
         self._sub1_x()  # x = x-1
 
-        # self._set1_x()  # x = 1
-        # self._set0_x()  # x = 0
+        self._set1_x()  # x = 1
+        self._set0_x()  # x = 0
         # self._set_1_x()  # x = -1
         # self._div2_x()  # divisão por 2
         # self._mul2_x()  # multiplicação por 2

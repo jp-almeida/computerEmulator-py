@@ -1,26 +1,37 @@
 goto main
 wb 0
 
-r ww 0 #output
-a ww 400 #input
-um ww 1
+in_out ww 2022 #input e output
+qtr ww 4
+cem ww 100
+qrtcents ww 400
 
-main add x, a 
-    jz x, biss #em_caso_de_a_ser_zero
-    goto loop
+#verificar se é divisivel por 400
+main    setX in_out
+        setY qrtcents
+        divXY
+        jzK biss
+        goto div4
 
-loop sub1 x #um
-    jz x, resp #nao_bissexto
-    sub1 x #dois
-    jz x, resp #nao_bissexto
-    sub1 x #tres
-    jz x, resp #nao_bissexto
-    sub1 x #quatro
-    jz x, biss #bissexto
-    goto loop
+#verificar se é divisivel por 4
+div4    setX in_out
+        setY qtr
+        divXY
+        jzK biss
+        goto nao_biss
 
-biss set1 x #bissexto
-    goto resp
+#verificar se é divisivel por 100
+div100  setX in_out
+        setY qtr
+        divXY
+        jzK nao_biss
+        goto biss
 
-resp mov x, r
-    halt
+biss        set1X
+            goto fim
+
+nao_biss    set0X
+            goto fim
+
+fim               movX in_out
+                  halt
