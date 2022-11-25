@@ -1,32 +1,31 @@
 goto main
 wb 0
  
-r ww 0 #output
-a ww 3 #input
+in_out ww 100 #input e output
+out ww 0 #guardar input
 d ww 1 #numero que esta sendo multiplicado por ele mesmo
-last_d ww 0 #ultimo numero que foi multiplicado
 
-main setX d
-     setY d
-     goto multip
+main      setX d
+          setY d
+          goto multip
 
 multip    multXY 
-          movX r #guarda o valor da multiplicacao em r
-          setY a 
+          movX out #guarda o valor da multiplicacao em in_out
+          setY in_out 
 
           #verifica se achou o numero desejado
-          setX r
-          subX a
+          setX in_out
+          subX out
           jzX final #se são iguais, finaliza
 
           #verifica se é maior
-          setX r
+          setX out
           isGreaterXY
           jzX inc #se é menor, continua
           #caso contrario, diminui D (para fazer o chão da raiz quadrada)
           setX d
           sub1X
-          movX r
+          movX in_out
           halt
 
 inc       setY d
@@ -36,5 +35,5 @@ inc       setY d
           goto main
 
 final     setX d
-          movX r
+          movX in_out
           halt

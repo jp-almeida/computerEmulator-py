@@ -548,24 +548,13 @@ class CPUBase:
         """
         isGreaterXY
         Verifica se X > Y. Caso positivo, aloca 1 em X. Caso negativo, 0.
-        Se são iguais, dirá que é maior.
+        Se são iguais, dirá que é maior, mas não é uma forma eficiente de verificar isso.
 
         Atenção:
         Não funciona para variáveis negativas ou nulas
         """
 
         self._init_instruction("isGreaterXY")
-
-        # -- Verificar se são iguais
-        # IF (X-Y) = 0 GOTO greater, ELSE GOTO next
-        self.firmware[self._next_idx - 1] = self._make_instruction(
-            0b001_00_111111_0000000_000_011_100
-        )
-        equal = self._next_idx + 256
-        # equal: X <- 1; GOTO main
-        self.firmware[equal] = self._make_instruction(
-            0b000_00_110001_0001000_000_000_000, 0
-        )
 
         # --- Subtrair um de cada. Quem acabar primeiro é o menor
         loop = self._next_idx
