@@ -9,29 +9,30 @@ tres ww 3
 
             #verificar se é zero
 main        setX in_out
-            jzX end_init #zero
+            jzX end_excep #zero
             
             #verificar se é um
             sub1X
-            jzX end_init #um
+            jzX end_excep #um
 
             #verificar se é dois
             sub1X
-            jzX end_init #dois
+            jzX end_excep #dois
 
             #verificar se é tres
             sub1X
-            jzX end_init #tres
+            jzX end_excep #tres
 
             movX in_out
             setY tres
             setX curr
             goto loop
             
+#nos casos anormais (0,1,2 e 3), a saída será igual à entrada, então não precisa modificar nada
+end_excep halt
 
-end_init halt
-
-#vai para o proximo numero
+#vai para o proximo numero (que vai ser verificado se é primo ou não)
+#é incrementado de 2 em 2 porque nenhum par é primo além do 2
 prox_num    setX curr
             add1X
             add1X
@@ -42,18 +43,19 @@ prox_num    setX curr
 
 #achou um primo
 achou       setX curr
-            movX last
+            movX last #atualiza o último primo achado para o número atual
             
-            #verifica se achou todos os números
+            #verifica se achou todos os números (diminui a contagem em 1)
             setX in_out
             sub1X
             jzX end
-            movX in_out
+            movX in_out #atualiza a variavel da contagem
             
             goto prox_num
 
+#loop principal: aumenta o denominador até igualar ao denominador ou o resto ser 0
 loop        divXY
-            jzK prox_num
+            jzK prox_num #se o resto for 0, não é numero primo
             setX curr
 
             #incrementa o denominador
@@ -61,14 +63,12 @@ loop        divXY
             add1Y 
             movY div
 
-            #ve se chegou no maximo
+            #ve se chegou no maximo (numerador = denominador)
             subXY
             jzX achou
             
             setX curr
             goto loop
-
-
 
 end         setX last
             movX in_out
