@@ -2,30 +2,37 @@ from emulator import CPU, Assembler, CPUBase
 
 
 def main():
-    assembler = Assembler("questao1melhor.asm")
+    assembler = Assembler("questao1.asm")
     assembler.execute()
 
-    cpu = CPU()
+    cpu = CPU(True)
     cpu.read_image("program.bin")
 
     print("passos ", cpu.execute())
-    print("x:", cpu._regs.X)
-    print("a:", cpu._memory._memory[2])
-    print("r:", cpu._memory._memory[1])
+    print("--- registradores")
+    print("X:", cpu._regs.X)
+    print("Y:", cpu._regs.Y)
+    print("K:", cpu._regs.K)
+    print("H:", cpu._regs.H)
+    print("--- variaveis")
+
+    for num, var in enumerate(["in_out", "qtr", "cem"]):
+        print(f"{var}: {cpu._memory._memory[num+1]}")
 
 
 def teste():
     assembler = Assembler("teste.asm")
-    print(assembler.instruction_set)
     assembler.execute()
     cpu = CPU()
     cpu.read_image("program.bin")
     print("passos ", cpu.execute())
-    print("x:", cpu._regs.X)
-    print("y:", cpu._regs.Y)
-    print("a:", cpu._memory._memory[1])
+    print("X:", cpu._regs.X)
+    print("Y:", cpu._regs.Y)
+    print("K:", cpu._regs.K)
+    print("H:", cpu._regs.H)
+    print("out: ", cpu._memory._memory[1])
 
 
 if __name__ == "__main__":
-    # main()
-    teste()
+    main()
+    # teste()
