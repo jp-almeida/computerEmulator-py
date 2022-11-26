@@ -493,6 +493,18 @@ class CPUBase:
             0b000_00_110110_0001000_000_011_000, 0
         )
 
+    def _sub1_y(self) -> None:
+        """
+        sub1Y
+        Y = Y - 1
+        Diminui 1 na variável Y
+        """
+        self._init_instruction("sub1Y")
+        ## X <- X - 1; GOTO main
+        self.firmware[self._next_idx] = self._make_instruction(
+            0b000_00_110110_0000100_000_100_000, 0
+        )
+
     def _set1_x(self) -> None:
         self._init_instruction("set1X")
         ##52: X <- 1; GOTO main
@@ -518,6 +530,16 @@ class CPUBase:
 
     def _div2_x(self) -> None:
         self._init_instruction("div2X")
+        ##55: X <- X/2; GOTO main
+        self.firmware[self._next_idx] = self._make_instruction(
+            0b000_10_010100_0001000_000_011_000, 0
+        )
+
+    def _div4_x(self) -> None:
+        self._init_instruction("div4X")
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b000_10_010100_0001000_000_011_000
+        )
         ##55: X <- X/2; GOTO main
         self.firmware[self._next_idx] = self._make_instruction(
             0b000_10_010100_0001000_000_011_000, 0
@@ -658,6 +680,7 @@ class CPUBase:
         self._add1_y()  # y = y + 1
 
         self._sub1_x()  # x = x-1
+        self._sub1_y()  # y = y - 1
 
         self._set1_x()  # x = 1
         self._set0_x()  # x = 0
@@ -666,6 +689,7 @@ class CPUBase:
         self._mul2_x()  # multiplicação de x por 2
 
         self._div2_x()  # divisão de x por 2
+        self._div4_x()  # divisão de x por 4
         self._div_x_16()  # divisão de x por 16
         self._andX()
         self._halt()  # halt
