@@ -2,7 +2,7 @@ from emulator import CPU, Assembler, CPUBase
 
 
 def main():
-    assembler = Assembler("questao1.asm")
+    assembler = Assembler("questao2_v2.asm")
     assembler.execute()
 
     cpu = CPU(True)
@@ -34,5 +34,5 @@ def teste():
 
 
 if __name__ == "__main__":
-    # main()
-    teste()
+    main()
+    # teste()

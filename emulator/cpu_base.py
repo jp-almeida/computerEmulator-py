@@ -151,7 +151,6 @@ class CPUBase:
         Se Y for 0, irá para <adress>
         """
 
-    # if Y = 0 goto address
     self._init_instruction("jzY", 1, True)
     is_zero = self._next_idx + 257
     # 11 IF Y = 0 GOTO is_zero ELSE GOTO next;
@@ -183,7 +182,7 @@ class CPUBase:
     is_zero = self._next_idx + 257
     # 11 IF K = 0 GOTO is_zero ELSE GOTO next;
     self.firmware[self._next_idx - 1] = self._make_instruction(
-      0b001_00_010100_0001000_000_110_000)
+      0b001_00_010100_0000000_000_110_000)
 
     # K != 0
     # 12 PC <- PC + 1; GOTO main;
@@ -596,7 +595,19 @@ class CPUBase:
     # self.firmware[self._next_idx] = self._make_instruction(
     #     0b000_00_111111_0000001_000_101_110, 0
     # )
-
+  def _andY(self) -> None:
+    """K <- Y & <input>"""
+    self._init_instruction("andY", 1)
+    # PC <- PC + 1; MBR <- read_byte(PC); GOTO next
+    self.firmware[self._next_idx - 1] = self._make_instruction(
+      0b000_00_110101_0010000_001_001_000)
+    # MAR <- MBR; read_word; GOTO next
+    self.firmware[self._next_idx - 1] = self._make_instruction(
+      0b000_00_010100_1000000_010_010_000)
+    # K <- X and MDR; GOTO main;
+    self.firmware[self._next_idx] = self._make_instruction(
+      0b000_00_001100_0000001_000_111_100, 0)
+    
   def _andX(self) -> None:
     """K <- X & <input>"""
     self._init_instruction("andX", 1)
@@ -699,6 +710,7 @@ class CPUBase:
     self._div4_x()  # X = X/4
     self._div_x_16()  # X = X/16
     self._andX()
+    self._andY()
     self._halt()  # halt
 
     self.is_greater_xy()
