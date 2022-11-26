@@ -158,6 +158,37 @@ class CPUBase:
             0b100_00_010100_0010000_001_010_000, 0
         )
 
+    def _jzY(self) -> None:
+        """
+        jzY <address>
+        Se Y for 0, irá para <adress>
+        """
+
+        # if Y = 0 goto address
+        self._init_instruction("jzY", 1, True)
+        is_zero = self._next_idx + 257
+        # 11 IF Y = 0 GOTO is_zero ELSE GOTO next;
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b001_00_010100_0000000_000_100_000
+        )
+
+        # Y != 0
+        # 12 PC <- PC + 1; GOTO main;
+        self.firmware[self._next_idx] = self._make_instruction(
+            0b000_00_110101_0010000_000_001_000, 0
+        )
+
+        # Y == 0
+        # is_zero: PC <- PC + 1; fetch; GOTO next
+        self.firmware[is_zero] = self._make_instruction(
+            0b000_00_110101_0010000_001_001_000, is_zero + 1, False
+        )
+
+        # PC <- MBR; fetch; GOTO MBR;
+        self.firmware[is_zero + 1] = self._make_instruction(
+            0b100_00_010100_0010000_001_010_000, 0
+        )
+
     def _jzK(self) -> None:
         """
         jzK <address>
@@ -654,9 +685,11 @@ class CPUBase:
         # A,B => 111 = MDR, 001 = PC, 010 = MBR, 011 = x, 100 = Y, 110 = K
         self._main()
 
-        self._goto()  # goto address
-        self._jzX()  # if X = 0 then goto address
-        self._jzK()  # if K = 0 then goto address
+        self._goto()  # goto <address>
+
+        self._jzX()  # if X = 0 then goto <address>
+        self._jzK()  # if K = 0 then goto <address>
+        self._jzY()  # if Y = 0 then goto <address>
 
         self._add_x()  # X = X + mem[address]
         self._add_y()  # Y = Y + mem[address]
