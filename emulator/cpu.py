@@ -10,13 +10,14 @@ from .memory import Memory
 class CPU(CPUBase):
     """Emulates a CPU"""
 
-    def __init__(self) -> None:
+    def __init__(self, log: bool = False) -> None:
         super().__init__()
         self._regs = Registers()
         self._alu = ALU()
         self._bus = Bus()
         self._memory = Memory()
         self._last_inst_idx = 0
+        self.display_log = log
 
     def read_image(self, img: str) -> None:
         """Reads a .bin file
@@ -89,13 +90,16 @@ class CPU(CPUBase):
         elif mem_bits & 0b100:
             self._memory.write_word(self._regs.MAR, self._regs.MDR)
 
+    def _get_current_status(self) -> str:
+        return f"X: {self._regs.X} | Y: {self._regs.Y} | K: {self._regs.K}"
+
     def _print_current_instruction(self, num: int) -> None:
         """Exibe no prompt mensagens indicando qual a intrução atual da execução do programa"""
         b = ("_").join(
             [bin(inst)[2:] for inst in self._parse_instruction(self._regs.MIR)]
         )
         if not num:
-            print(f"| main ({self._regs.MPC}) ->{b} ")
+            print(f"| main ({self._regs.MPC}) -> {b} [{self._get_current_status()}]")
             return
         else:
             for key, n in self._ops_dict.items():
@@ -103,7 +107,7 @@ class CPU(CPUBase):
                     print(f"| {key}")
                     break
 
-        print(f"\t({self._regs.MPC}) -> {b} ")
+        print(f"\t({self._regs.MPC}) -> {b} [{self._get_current_status()}]")
 
     def _step(self) -> bool:
         """
@@ -113,7 +117,8 @@ class CPU(CPUBase):
         """
         self._regs.MIR = self.firmware[self._regs.MPC]
 
-        self._print_current_instruction(self._regs.MPC)
+        if self.display_log:
+            self._print_current_instruction(self._regs.MPC)
 
         if self._regs.MIR == 0:
             return False
