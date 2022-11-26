@@ -23,7 +23,7 @@ def main():
 def teste():
     assembler = Assembler("teste.asm")
     assembler.execute()
-    cpu = CPU()
+    cpu = CPU(True)
     cpu.read_image("program.bin")
     print("passos ", cpu.execute())
     print("X:", cpu._regs.X)
@@ -34,5 +34,5 @@ def teste():
 
 
 if __name__ == "__main__":
-    main()
-    # teste()
+    # main()
+    teste()

@@ -78,7 +78,7 @@ class Assembler:
         else:
             raise ValueError("Invalid input ", ops)
 
-    def _encode_instruction(self, instruction: str, ops: list) -> list[int]:
+    def _encode_instruction(self, instruction: str, ops: list) -> list:
         """
         Retorna a instrução dada em binário
         """

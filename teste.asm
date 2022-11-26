@@ -7,19 +7,5 @@ r ww 2
 
 program setX o
     setY r
-    isGreaterXY
-    halt
-
-
-
-
-
-
-
-
-
-
-teste setY r #teste um dois tres
-    setX o
-    divXY
+    multEvenXY
     halt
