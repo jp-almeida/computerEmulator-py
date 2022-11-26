@@ -251,6 +251,13 @@ class CPUBase:
             0b100_00_010100_0010000_001_010_000, 0
         )
 
+    def _sub_xy(self) -> None:
+        # X <- X-Y; GOTO main
+        self._init_instruction("subXY")
+        self.firmware[self._next_idx] = self._make_instruction(
+            0b000_00_111111_0001000_000_011_100, 0
+        )
+
     def _sub_x(self) -> None:
         """
         subX v
@@ -696,6 +703,7 @@ class CPUBase:
 
         self._sub_x()  # X = X - mem[address]
         self._sub_y()  # Y = Y - mem[address]
+        self._sub_xy()  # X = X-Y
 
         self._set_x()  # X = mem[address]
         self._set_y()  # Y = mem[address]
@@ -703,8 +711,8 @@ class CPUBase:
         self._mov_y()  # mem[address] = Y
         self._mov_x()  # mem[address] = X
 
-        self._mul_xy()
-        self._div_xy()
+        self._mul_xy()  # X = X*Y
+        self._div_xy()  # X = X/Y ; K = X % Y
         # self._mem_H()
 
         # self._x_desl()
@@ -719,11 +727,11 @@ class CPUBase:
         self._set0_x()  # x = 0
         # self._set_1_x()  # x = -1
 
-        self._mul2_x()  # multiplicação de x por 2
+        self._mul2_x()  # X = X * 2
 
-        self._div2_x()  # divisão de x por 2
-        self._div4_x()  # divisão de x por 4
-        self._div_x_16()  # divisão de x por 16
+        self._div2_x()  # X = X/2
+        self._div4_x()  # X = X/4
+        self._div_x_16()  # X = X/16
         self._andX()
         self._halt()  # halt
 
