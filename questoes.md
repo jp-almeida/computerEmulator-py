@@ -14,7 +14,9 @@ calcule o fatorial de "n" e guarde o resultado de volta na word 1.
 
 | Entrada | Passos|
 |----------|--------|
-| _ | _ |
+| 5 | 135 |
+|6|170|
+|100|340|
 
 3. Escreva um programa que pegue um valor "n" guardado na word 1 da memória,
 calcule o "n-ésimo" número primo e guarde-o de volta na word 1.
