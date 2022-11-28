@@ -650,30 +650,36 @@ class CPUBase:
             0b000_00_111111_0000001_000_110_101, 0
         )
 
+    def _div16_x(self) -> None:
+        self._init_instruction("div16X")
+        ## K <- X; GOTO next
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b000_00_010100_0000001_000_011_000
+        )
+        for i in range(4):
+            ## X <- X/2; GOTO next
+            self.firmware[self._next_idx - 1] = self._make_instruction(
+                0b000_10_010100_0001000_000_011_000
+            )
+        ## H <- X*2; GOTO next
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b000_01_010100_0000010_000_011_000
+        )
+        for i in range(3):
+            ## H <- H*2; GOTO next
+            self.firmware[self._next_idx - 1] = self._make_instruction(
+                0b000_01_010100_0000010_000_101_000
+            )
+        ## K <- H - H; GOTO main
+        self.firmware[self._next_idx] = self._make_instruction(
+            0b000_00_111111_0000001_000_110_101, 0
+        )
+
     def _mul2_x(self) -> None:
         self._init_instruction("mul2X")
         ##56: X <- X*2; GOTO main
         self.firmware[self._next_idx] = self._make_instruction(
             0b000_01_010100_0001000_000_011_000, 0
-        )
-
-    def _div_x_16(self) -> None:
-        """Divide X por 16. Armazena o resto da divisão em K"""
-        self._init_instruction("div16X")
-        ##H <- X; GOTO next
-        self.firmware[self._next_idx - 1] = self._make_instruction(
-            0b000_00_010100_0000010_000_011_000
-        )
-
-        for i in range(3):
-            ##X <- X/2; GOTO next
-            self.firmware[self._next_idx - 1] = self._make_instruction(
-                0b000_10_010100_0001000_000_011_000
-            )
-
-        ##X <- X/2;GOTO main
-        self.firmware[self._next_idx] = self._make_instruction(
-            0b000_10_010100_0001000_000_011_000, 0
         )
 
     def _andY(self) -> None:
@@ -800,7 +806,7 @@ class CPUBase:
 
         self._div2_x()  # X = X/2
         self._div4_x()  # X = X/4
-        self._div_x_16()  # X = X/16
+        self._div16_x()  # X = X/16
         self._andX()
         self._andY()
         self._halt()  # halt
