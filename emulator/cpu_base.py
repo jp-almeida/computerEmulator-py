@@ -437,7 +437,7 @@ class CPUBase:
       0b000_00_111111_0001000_000_011_100, start, False)
 
   def _mem_H(self) -> None:
-    self._init_instruction("memH", 1)  # TODO: escolher um nome melhor
+    self._init_instruction("memH", 1)  
     # mem[address] = H
     # 36: PC <- PC + 1; fetch; GOTO next
     self.firmware[self._next_idx] = self._make_instruction(
@@ -475,8 +475,7 @@ class CPUBase:
     self.firmware[self._next_idx] = self._make_instruction(
       0b000_00_010100_0000100_000_111_000, 0)
 
-  def _x_desl(
-      self) -> None:  # TODO: o mesmo da operação de multiplicação por 2?
+  def _x_desl(self) -> None:  
     # X = X(deslocado para a direita)
     # 48: X<-X deslocado
     self.firmware[48] = 0b0000000000_001_00_101000_0010000_000_111_11
@@ -537,9 +536,7 @@ class CPUBase:
     self.firmware[self._next_idx] = self._make_instruction(
       0b000_00_010000_0001000_000_011_000, 0)
 
-  def _set_1_x(self) -> None:  # TODO: Not working
-    # TODO: incrementar PC
-    # TODO: testar
+  def _set_1_x(self) -> None: 
     self._init_instruction("set-1X")
     ##54: X <- -1; GOTO main
     self.firmware[self._next_idx] = self._make_instruction(
@@ -581,20 +578,6 @@ class CPUBase:
     self.firmware[self._next_idx] = self._make_instruction(
       0b000_10_010100_0001000_000_011_000, 0)
 
-    # ##K <- X*2; GOTO next
-    # self.firmware[self._next_idx - 1] = self._make_instruction(
-    #     0b000_01_010100_0000001_000_011_000
-    # )
-    # for i in range(2):
-    #     ##K <- K*2; GOTO next
-    #     self.firmware[self._next_idx - 1] = self._make_instruction(
-    #         0b000_01_010100_0000001_000_110_000
-    #     )
-
-    # ##K <- H-K; GOTO main
-    # self.firmware[self._next_idx] = self._make_instruction(
-    #     0b000_00_111111_0000001_000_101_110, 0
-    # )
   def _andY(self) -> None:
     """K <- Y & <input>"""
     self._init_instruction("andY", 1)
