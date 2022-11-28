@@ -1,7 +1,7 @@
 goto main
 wb 0
 
-in_out ww 6
+in_out ww 7
 last ww 3 #ultimo numero primo encontrado
 curr ww 5 #numero atual (que está sendo dividido)
 div ww 3 #numero que está divindo
@@ -60,7 +60,8 @@ loop        divXY
 
             #incrementa o denominador
             setY div
-            add1Y 
+            add1Y
+            add1Y
             movY div
 
             #ve se chegou no maximo (numerador = denominador)
