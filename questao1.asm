@@ -1,7 +1,7 @@
 goto main
 wb 0
 
-in_out ww 200000 #input e output
+in_out ww 2001 #input e output
 cem ww 100
 dois ww 2
 oito ww 8
