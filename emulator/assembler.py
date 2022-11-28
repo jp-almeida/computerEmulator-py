@@ -82,8 +82,6 @@ class Assembler:
         """
         Retorna a instrução dada em binário
         """
-        # if instruction == "goto":
-        #     return self._encode_goto(ops)
         if instruction == "wb":
             return self._encode_wb(ops)
         elif instruction == "ww":
@@ -113,7 +111,7 @@ class Assembler:
         """
         for line in self.lines:
             if not (line_bin := self._line_to_bin(line)):
-                raise SyntaxError(f"Line {line}")  # self.lines.index(line) + 1)
+                raise SyntaxError(f"Line {line}")
             self.lines_bin.append(line_bin)
 
     def _find_line_for_names(self) -> None:
