@@ -250,6 +250,16 @@ class CPUBase:
             0b100_00_010100_0010000_001_010_000, 0
         )
 
+    def _is_equal_xy(self) -> None:
+        """
+        Armazena em K o resultado da subtração X - Y
+        """
+        self._init_instruction("isEqualXY")
+        # K <- X-Y; GOTO main
+        self.firmware[self._next_idx] = self._make_instruction(
+            0b000_00_111111_0000001_000_011_100, 0
+        )
+
     def _sub_xy(self) -> None:
         # X <- X-Y; GOTO main
         self._init_instruction("subXY")
@@ -823,7 +833,7 @@ class CPUBase:
         # self._mem_H()
 
         # self._x_desl()
-
+        self._is_equal_xy()  # k = x - y
         self._add1_x()  # x = x+1
         self._add1_y()  # y = y + 1
         self._add2_x()
