@@ -51,7 +51,6 @@ loop        divXY
             setX curr
 
             #incrementa o denominador
-            setY div
             add2Y
             movY div
 
