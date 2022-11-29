@@ -562,6 +562,38 @@ class CPUBase:
             0b000_00_110101_0001000_000_011_000, 0
         )
 
+    def _add2_x(self) -> None:
+        """
+        add2X
+        X = X + 2
+        Incrementa 2 na variável X
+        """
+        self._init_instruction("add2X")
+        ## X <- 1 + X;
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b000_00_110101_0001000_000_011_000
+        )
+        ## X <- 1 + X; GOTO main
+        self.firmware[self._next_idx] = self._make_instruction(
+            0b000_00_110101_0001000_000_011_000, 0
+        )
+
+    def _add2_y(self) -> None:
+        """
+        add2Y
+        Y = Y + 2
+        Incrementa 2 na variável Y
+        """
+        self._init_instruction("add2Y")
+        ## Y <- 1 + Y;
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b000_00_110101_0000100_000_100_000
+        )
+        ## Y <- 1 + Y; GOTO main
+        self.firmware[self._next_idx] = self._make_instruction(
+            0b000_00_110101_0000100_000_100_000, 0
+        )
+
     def _add1_y(self) -> None:
         """
         add1Y
@@ -794,6 +826,8 @@ class CPUBase:
 
         self._add1_x()  # x = x+1
         self._add1_y()  # y = y + 1
+        self._add2_x()
+        self._add2_y()
 
         self._sub1_x()  # x = x-1
         self._sub1_y()  # y = y - 1
