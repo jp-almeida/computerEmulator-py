@@ -8,9 +8,13 @@ from .memory import Memory
 
 
 class CPU(CPUBase):
-    """Emulates a CPU"""
+    """Emula uma CPU"""
 
     def __init__(self, log: bool = False) -> None:
+        """
+        Args:
+            log (bool, opcional): Caso True, irá exibir mensagens de log no prompt. Padrão é False.
+        """
         super().__init__()
         self._regs = Registers()
         self._alu = ALU()
@@ -20,9 +24,9 @@ class CPU(CPUBase):
         self.display_log = log
 
     def read_image(self, img: str) -> None:
-        """Reads a .bin file
+        """Lê um arquivo .bin
         Args:
-            img (str): path to the file
+            img (str): path para o arquivo
         """
         byte_address = 0
         with open(img, "rb") as disk:

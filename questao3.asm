@@ -1,7 +1,7 @@
 goto main
 wb 0
 
-in_out ww 50
+in_out ww 10
 last ww 3 #ultimo numero primo encontrado
 curr ww 5 #numero atual (que está sendo dividido)
 div ww 3 #numero que está divindo
@@ -44,9 +44,9 @@ achou       movX last #atualiza o último primo achado para o número atual
             movX in_out #atualiza a variavel da contagem
             
             goto prox_num
-
+            
 #loop principal: aumenta o denominador até igualar ao denominador ou até o resto ser 0
-loop        divXY
+loop        divisXY
             jzK prox_num #se o resto for 0, não é numero primo
             setX curr
 

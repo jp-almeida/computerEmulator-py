@@ -507,6 +507,67 @@ class CPUBase:
             0b000_00_111111_0001000_000_011_100, start, False
         )
 
+    def _divis_xy(self) -> None:
+        """divisXY
+        Verifica se X é divisivel por Y. Não considera Y sendo 0
+        Caso K = 0, então é divisível
+        """
+
+        self._init_instruction("divisXY")
+
+        # Zera K
+        start = self._next_idx  # onde inicia cada divisão
+        # 37: K<-0; GOTO next
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b000_00_010000_0000001_000_000_000
+        )
+
+        # Verifica se o numerador é 0
+        end = self._next_idx + 257
+        start_div = self._next_idx  # onde inicia o loop de cada divisão
+        # start_div: IF X=0 GOTO (end); ELSE GOTO next
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b001_00_010100_0000000_000_011_000
+        )
+        # end: GOTO main -> Encerra a operação de divisão. Nesse caso, os números são divisíveis
+        self.firmware[end] = self._make_instruction(
+            0b000_00_000000_0000000_001_001_000, 0
+        )
+
+        # Incrementa K em 1
+        inc_K = self._next_idx
+        # 38 inc_K: K<-K+1; GOTO next
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b000_00_111001_0000001_000_000_110
+        )
+
+        # Verifica se K já alcançou Y. Caso tenha alcançado, diminui X
+        sub_xy = self._next_idx + 257
+        # 39: IF Y-K=0 GOTO (y_k0);ELSE GOTO nxt
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b001_00_111111_0000000_000_100_110
+        )
+        # sub_XY: X <- X-Y; GOTO start
+        self.firmware[sub_xy] = self._make_instruction(
+            0b000_00_111111_0001000_000_011_100, start, False
+        )
+
+        # > K != Y
+        # Verifica se K é X.
+        # Caso não seja, continua a divisão (incrementando K)
+        # Caso seja, encerra a divisão e isso indica que os números não são divisíveis
+        x_equal_k = self._next_idx + 257
+        # 40: IF (X-K)=0 GOTO 289; ELSE GOTO inc_K
+        self.firmware[self._next_idx - 1] = self._make_instruction(
+            0b001_00_111111_0000000_000_011_110, inc_K
+        )
+
+        # >> K = X -> Não divisível
+        # fetch, GOTO main -> Encerra a operação de divisão
+        self.firmware[x_equal_k] = self._make_instruction(
+            0b000_00_110101_0000000_001_001_000, 0
+        )
+
     def _mem_H(self) -> None:
         self._init_instruction("memH", 1)
         # mem[address] = H
@@ -809,7 +870,7 @@ class CPUBase:
         self._main()
 
         self._goto()  # goto <address>
-
+        self._divis_xy()
         self._jzX()  # if X = 0 then goto <address>
         self._jzK()  # if K = 0 then goto <address>
         self._jzY()  # if Y = 0 then goto <address>
